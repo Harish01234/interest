@@ -8,6 +8,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from '@/components/ui/sonner'
 
 
 import appCss from '../styles.css?url'
@@ -51,6 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <ThemeProvider>
           {children}
+          <Toaster richColors closeButton />
         </ThemeProvider>
         <TanStackDevtools
           config={{
