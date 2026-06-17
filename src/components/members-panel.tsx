@@ -13,6 +13,8 @@ import {
 import { toast } from 'sonner'
 
 import type { MemberType } from '@/lib/read-csv'
+import { MetricCard } from '@/components/patterns/metric-card'
+import { SectionCard } from '@/components/patterns/section-card'
 import {
   createMember,
   deleteMember,
@@ -39,14 +41,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -105,10 +99,10 @@ const pageSizeOptions = [10, 20, 50] as const
 type TypeFilter = GetMembersParams['type']
 
 const typeBadgeClass: Record<MemberType, string> = {
-  gold: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  silver: 'bg-slate-500/15 text-slate-700 dark:text-slate-300',
-  both: 'bg-primary/15 text-primary',
-  unknown: 'bg-muted text-muted-foreground',
+  gold: 'badge-type-gold',
+  silver: 'badge-type-silver',
+  both: 'badge-type-both',
+  unknown: 'badge-type-unknown',
 }
 
 function MemberTypeBadge({ type }: { type: MemberType }) {
@@ -226,6 +220,10 @@ function AddMemberDialog({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
 
+    if (createMutation.isPending) {
+      return
+    }
+
     const missing = memberFormFields
       .filter((field) => field.required && !form[field.key].trim())
       .map((field) => field.label)
@@ -275,21 +273,19 @@ function AddMemberDialog({
             </Select>
           </div>
 
-          <div className="surface-muted divide-y rounded-lg border border-border">
+          <div className="form-field-grid divide-y">
             {memberFormFields.map((field) => (
-              <div
-                key={field.key}
-                className="grid gap-2 px-4 py-3 sm:grid-cols-[140px_1fr]"
-              >
-                <Label htmlFor={`add-${field.key}`} className="text-sm font-medium">
+              <div key={field.key} className="form-field-row">
+                <Label htmlFor={`add-${field.key}`} className="form-field-label">
                   {field.label}
                   {field.required ? (
-                    <span className="text-destructive"> *</span>
+                    <span className="form-field-required"> *</span>
                   ) : null}
                 </Label>
                 <Input
                   id={`add-${field.key}`}
                   value={form[field.key]}
+                  disabled={createMutation.isPending}
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
@@ -313,9 +309,9 @@ function AddMemberDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
+            <Button type="submit" disabled={createMutation.isPending} aria-busy={createMutation.isPending}>
               {createMutation.isPending ? <Spinner className="size-4" /> : null}
-              Add member
+              {createMutation.isPending ? 'Adding…' : 'Add member'}
             </Button>
           </DialogFooter>
         </form>
@@ -463,18 +459,14 @@ function MemberDetailDialog({
               )}
             </div>
 
-            <div className="surface-muted divide-y rounded-lg border border-border">
+            <div className="form-field-grid divide-y">
               {fields.map((field) => (
-                <div
-                  key={field.key}
-                  className="grid gap-2 px-4 py-3 sm:grid-cols-[140px_1fr]"
-                >
-                  <Label className="text-sm font-medium text-muted-foreground">
-                    {field.label}
-                  </Label>
+                <div key={field.key} className="form-field-row">
+                  <Label className="form-field-label">{field.label}</Label>
                   {isEditing ? (
                     <Input
                       value={form[field.key]}
+                      disabled={updateMutation.isPending}
                       onChange={(event) =>
                         setForm((current) =>
                           current
@@ -521,18 +513,20 @@ function MemberDetailDialog({
                   <Button
                     type="button"
                     variant="outline"
+                    size="sm"
                     onClick={() => setIsEditing(true)}
                   >
                     <Pencil className="size-4" />
-                    Edit
+                    Edit member
                   </Button>
                   <Button
                     type="button"
                     variant="destructive"
+                    size="sm"
                     onClick={() => setDeleteOpen(true)}
                   >
                     <Trash2 className="size-4" />
-                    Delete
+                    Delete member
                   </Button>
                 </>
               )}
@@ -644,289 +638,279 @@ export function MembersPanel() {
   const rangeEnd = Math.min(page * pageSize, total)
 
   return (
-    <>
-      <Card className="surface-card gap-0 py-0">
-        <CardHeader className="gap-3">
-          <div className="icon-tile icon-tile-chart-1 mb-1">
-            <Coins className="size-4.5" />
-          </div>
-          <CardTitle className="text-base font-semibold">Grand total credit</CardTitle>
-          <CardDescription>
-            Sum of all member credits across the full database.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pb-6">
-          <div className="stat-tile stat-tile-chart-1 px-4 py-5">
-            {isCreditLoading ? (
-              <Spinner className="size-5 text-primary" />
-            ) : (
-              <>
-                <p className="stat-value text-2xl font-semibold">
-                  {creditData?.formatted ?? '0'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Across {creditData?.count ?? 0} member
-                  {(creditData?.count ?? 0) === 1 ? '' : 's'}
-                </p>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+    <div className="flex flex-col gap-4">
+      <SectionCard
+        icon={Coins}
+        iconVariant="chart1"
+        title="Grand total credit"
+        description="Sum of all member credits across the full database."
+      >
+        <MetricCard
+          label="Total credit balance"
+          value={creditData?.formatted ?? '₹ 0.00'}
+          hint={`Across ${creditData?.count ?? 0} member${(creditData?.count ?? 0) === 1 ? '' : 's'}`}
+          loading={isCreditLoading}
+        />
+      </SectionCard>
 
-      <Card className="surface-card gap-0 py-0">
-        <CardHeader className="gap-3">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-3">
-              <div className="icon-tile icon-tile-primary mb-1">
-                <Users className="size-4.5" />
-              </div>
-              <CardTitle className="text-base font-semibold">Members</CardTitle>
-              <CardDescription>
-                Browse, search, edit, and manage imported member records.
-              </CardDescription>
-            </div>
-            <Button
-              type="button"
-              className="btn-primary-glow shrink-0"
-              onClick={() => setAddOpen(true)}
-            >
-              <Plus className="size-4" />
-              Add member
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4 pb-2">
-          <div className="flex flex-col gap-3 lg:flex-row">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by name, phone, sl no, credit..."
-                className="pl-9"
-              />
-            </div>
-
-            <Select
-              value={typeFilter}
-              onValueChange={(value) => {
-                setTypeFilter(value as TypeFilter)
-                setPage(1)
-              }}
-            >
-              <SelectTrigger className="w-full lg:w-44">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                {typeFilterOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                setPageSize(Number(value) as (typeof pageSizeOptions)[number])
-                setPage(1)
-              }}
-            >
-              <SelectTrigger className="w-full lg:w-36">
-                <SelectValue placeholder="Rows per page" />
-              </SelectTrigger>
-              <SelectContent>
-                {pageSizeOptions.map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size} / page
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-            <span className="text-muted-foreground">
-              Showing {rangeStart}-{rangeEnd} of {total} members
-            </span>
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="font-medium text-foreground">
-                Filtered subtotal:{' '}
-                <span className="text-chart-1">{filteredCreditFormatted}</span>
-              </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isFetching}
-                onClick={() => refetch()}
-              >
-                {isFetching ? <Spinner className="size-4" /> : <RefreshCw className="size-4" />}
-                Refresh
-              </Button>
-            </div>
-          </div>
-
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <Spinner className="size-6 text-primary" />
-            </div>
-          ) : error ? (
-            <Empty className="surface-muted border border-dashed">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Users />
-                </EmptyMedia>
-                <EmptyTitle>Could not load members</EmptyTitle>
-                <EmptyDescription>
-                  {error instanceof Error
-                    ? error.message
-                    : 'Something went wrong while fetching members.'}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : members.length === 0 ? (
-            <Empty className="surface-muted border border-dashed">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Users />
-                </EmptyMedia>
-                <EmptyTitle>
-                  {total === 0 && !debouncedSearch && typeFilter === 'all'
-                    ? 'No members yet'
-                    : 'No matches found'}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {total === 0 && !debouncedSearch && typeFilter === 'all'
-                    ? 'Import a CSV file to populate member records.'
-                    : 'Try a different search term or type filter.'}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="surface-muted rounded-lg border border-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sl no</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Father&apos;s name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Credit</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members.map((member) => (
-                    <TableRow
-                      key={member.id}
-                      className="cursor-pointer"
-                      onClick={() => setSelectedMember(member)}
-                    >
-                      <TableCell className="font-medium">{member.slNo}</TableCell>
-                      <TableCell>{member.name}</TableCell>
-                      <TableCell>{member.fatherName}</TableCell>
-                      <TableCell>{member.phoneNo}</TableCell>
-                      <TableCell>
-                        <MemberTypeBadge type={member.type} />
-                      </TableCell>
-                      <TableCell>{member.credit}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            setSelectedMember(member)
-                          }}
-                        >
-                          <Eye className="size-4" />
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-                <TableFooter>
-                  <TableRow className="bg-muted/60 font-medium">
-                    <TableCell colSpan={5}>Page subtotal</TableCell>
-                    <TableCell className="text-chart-1">{pageCreditFormatted}</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </div>
-          )}
-
-          {totalPages > 1 ? (
-            <Pagination className="justify-center pt-2">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      if (page > 1) setPage(page - 1)
-                    }}
-                    className={cn(page <= 1 && 'pointer-events-none opacity-50')}
-                  />
-                </PaginationItem>
-
-                {paginationItems.map((item, index) =>
-                  item === 'ellipsis' ? (
-                    <PaginationItem key={`ellipsis-${index}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={item}>
-                      <PaginationLink
-                        href="#"
-                        isActive={item === page}
-                        onClick={(event) => {
-                          event.preventDefault()
-                          setPage(item)
-                        }}
-                      >
-                        {item}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ),
-                )}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      if (page < totalPages) setPage(page + 1)
-                    }}
-                    className={cn(
-                      page >= totalPages && 'pointer-events-none opacity-50',
-                    )}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          ) : null}
-        </CardContent>
-
-        <CardFooter className="border-t border-border bg-muted/40 py-4">
+      <SectionCard
+        icon={Users}
+        iconVariant="primary"
+        title="Members"
+        description="Browse, search, edit, and manage imported member records."
+        actions={
+          <Button
+            type="button"
+            className="btn-primary-glow shrink-0"
+            onClick={() => setAddOpen(true)}
+          >
+            <Plus className="size-4" />
+            Add member
+          </Button>
+        }
+        footer={
           <Button
             type="button"
             variant="destructive"
             disabled={allMembersCount === 0 || deleteAllMutation.isPending}
+            aria-busy={deleteAllMutation.isPending}
             onClick={() => setDeleteAllOpen(true)}
           >
             <Trash2 className="size-4" />
             Delete all members
           </Button>
-        </CardFooter>
-      </Card>
+        }
+        footerAlign="between"
+        bodyClassName="space-y-4"
+      >
+        <div className="data-toolbar">
+          <div className="search-field">
+            <Search className="search-field-icon" aria-hidden />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by name, phone, sl no, credit..."
+              className="search-field-input"
+              aria-label="Search members"
+            />
+          </div>
+
+          <Select
+            value={typeFilter}
+            onValueChange={(value) => {
+              setTypeFilter(value as TypeFilter)
+              setPage(1)
+            }}
+          >
+            <SelectTrigger className="toolbar-select toolbar-select-md">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              {typeFilterOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={String(pageSize)}
+            onValueChange={(value) => {
+              setPageSize(Number(value) as (typeof pageSizeOptions)[number])
+              setPage(1)
+            }}
+          >
+            <SelectTrigger className="toolbar-select toolbar-select-sm">
+              <SelectValue placeholder="Rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size} per page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="meta-bar">
+          <span className="text-muted-foreground">
+            Showing {rangeStart}–{rangeEnd} of {total} members
+          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="meta-stat">
+              Filtered subtotal:{' '}
+              <span className="meta-stat-value">{filteredCreditFormatted}</span>
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isFetching}
+              aria-busy={isFetching}
+              onClick={() => refetch()}
+            >
+              {isFetching ? (
+                <Spinner className="size-4" />
+              ) : (
+                <RefreshCw className="size-4" />
+              )}
+              Refresh list
+            </Button>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="loading-panel" role="status" aria-label="Loading members">
+            <Spinner className="size-6 text-primary" />
+          </div>
+        ) : error ? (
+          <Empty className="surface-muted border border-dashed py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Users />
+              </EmptyMedia>
+              <EmptyTitle>Could not load members</EmptyTitle>
+              <EmptyDescription>
+                {error instanceof Error
+                  ? error.message
+                  : 'Something went wrong while fetching members.'}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : members.length === 0 ? (
+          <Empty className="surface-muted border border-dashed py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Users />
+              </EmptyMedia>
+              <EmptyTitle>
+                {total === 0 && !debouncedSearch && typeFilter === 'all'
+                  ? 'No members yet'
+                  : 'No matches found'}
+              </EmptyTitle>
+              <EmptyDescription>
+                {total === 0 && !debouncedSearch && typeFilter === 'all'
+                  ? 'Import a CSV file or add a member manually to get started.'
+                  : 'Try a different search term or type filter.'}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="data-table-wrap">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Sl no</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Father&apos;s name</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Credit</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {members.map((member) => (
+                  <TableRow
+                    key={member.id}
+                    onClick={() => setSelectedMember(member)}
+                  >
+                    <TableCell className="font-medium">{member.slNo}</TableCell>
+                    <TableCell>{member.name}</TableCell>
+                    <TableCell className="max-w-48 truncate">
+                      {member.fatherName}
+                    </TableCell>
+                    <TableCell>{member.phoneNo}</TableCell>
+                    <TableCell>
+                      <MemberTypeBadge type={member.type} />
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      {member.credit}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-label={`View details for ${member.name}`}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setSelectedMember(member)
+                        }}
+                      >
+                        <Eye className="size-4" />
+                        <span className="hidden sm:inline">View</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={5}>Page subtotal</TableCell>
+                  <TableCell className="text-right text-chart-1 tabular-nums">
+                    {pageCreditFormatted}
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        )}
+
+        {totalPages > 1 ? (
+          <Pagination className="justify-center pt-1" aria-label="Members pagination">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (page > 1) setPage(page - 1)
+                  }}
+                  className={cn(page <= 1 && 'pointer-events-none opacity-50')}
+                />
+              </PaginationItem>
+
+              {paginationItems.map((item, index) =>
+                item === 'ellipsis' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={item}>
+                    <PaginationLink
+                      href="#"
+                      isActive={item === page}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        setPage(item)
+                      }}
+                    >
+                      {item}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (page < totalPages) setPage(page + 1)
+                  }}
+                  className={cn(
+                    page >= totalPages && 'pointer-events-none opacity-50',
+                  )}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        ) : null}
+      </SectionCard>
 
       <AddMemberDialog
         open={addOpen}
@@ -973,11 +957,11 @@ export function MembersPanel() {
               }}
             >
               {deleteAllMutation.isPending ? <Spinner className="size-4" /> : null}
-              Delete all
+              Delete all members
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   )
 }

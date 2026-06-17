@@ -52,7 +52,7 @@ export default function HeaderUser() {
           <Button
             variant="outline"
             aria-label="Open account menu"
-            className="h-10 gap-2 rounded-full border-border bg-card pl-1.5 pr-2.5 shadow-[var(--shadow-elevated)] transition-all duration-200 hover:bg-muted"
+            className="surface-glass-modal h-10 gap-2 rounded-full border-border pl-1.5 pr-2.5 transition-all duration-200 hover:bg-accent/50"
           >
             <Avatar size="sm">
               <AvatarImage

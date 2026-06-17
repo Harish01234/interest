@@ -58,7 +58,7 @@ function Home() {
             Build with <span className="text-gradient-brand">Interest</span>
           </h1>
 
-          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-lg">
             A modern TanStack Start app with Better Auth, Prisma, and a polished
             interface powered by cyan and blue design tokens.
           </p>

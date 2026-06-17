@@ -77,7 +77,7 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden items-center gap-2 sm:flex">
             <HeaderUser />
             <ModeToggle />
@@ -96,7 +96,7 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full max-w-xs border-border bg-popover"
+              className="surface-glass-panel w-full max-w-xs border-border"
             >
               <SheetHeader className="text-left">
                 <SheetTitle className="font-heading">Navigation</SheetTitle>

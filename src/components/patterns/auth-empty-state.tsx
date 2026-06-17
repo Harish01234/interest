@@ -23,13 +23,15 @@ export function AuthEmptyState({
   description,
 }: AuthEmptyStateProps) {
   return (
-    <Empty className="surface-card border-dashed border-border bg-card/60 py-12">
+    <Empty className="surface-card border border-dashed border-border px-6 py-14">
       <EmptyHeader>
-        <EmptyMedia variant="icon" className="size-12 rounded-xl">
-          <Icon className="size-5" />
+        <EmptyMedia variant="icon" className="icon-tile size-12 rounded-xl">
+          <Icon className="size-5" aria-hidden />
         </EmptyMedia>
-        <EmptyTitle className="text-base">{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
+        <EmptyTitle className="text-lg font-semibold">{title}</EmptyTitle>
+        <EmptyDescription className="max-w-md text-sm leading-relaxed">
+          {description}
+        </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button className="btn-primary-glow rounded-full px-5" asChild>

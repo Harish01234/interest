@@ -3,18 +3,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { FileSpreadsheet, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { SectionCard } from '@/components/patterns/section-card'
 import { readMemberCsvFromFile, type MemberRecord } from '@/lib/read-csv'
 import { migrateMembers } from '@/members/migration'
 import { membersQueryKey } from '@/members/queries'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -57,6 +50,10 @@ export function CsvForm() {
       return
     }
 
+    if (isMigrating) {
+      return
+    }
+
     setIsMigrating(true)
 
     try {
@@ -87,65 +84,67 @@ export function CsvForm() {
 
   return (
     <>
-      <Card className="surface-card gap-0 py-0">
-      <CardHeader className="gap-3">
-        <div className="icon-tile icon-tile-chart-2 mb-1">
-          <FileSpreadsheet className="size-4.5" />
-        </div>
-        <CardTitle className="text-base font-semibold">CSV import</CardTitle>
-        <CardDescription>
-          Upload a CSV file and run migration when you are ready.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4 pb-2">
-        <div className="space-y-2">
-          <Label htmlFor="csv-upload">CSV file</Label>
-          <Input
-            ref={inputRef}
-            id="csv-upload"
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleFileChange}
-            className="cursor-pointer file:mr-3"
-          />
-        </div>
-
-        {file ? (
-          <div className="surface-muted flex items-center gap-3 px-4 py-3 text-sm">
-            <Upload className="size-4 shrink-0 text-chart-2" aria-hidden />
-            <div className="min-w-0">
-              <p className="truncate font-medium text-foreground">{file.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(file.size / 1024).toFixed(1)} KB
-              </p>
-            </div>
+      <SectionCard
+        icon={FileSpreadsheet}
+        iconVariant="chart2"
+        title="CSV import"
+        description="Upload a member CSV file. Data is parsed locally, then migrated to the database when you confirm."
+        footer={
+          <Button
+            type="button"
+            className="btn-primary-glow w-full sm:w-auto"
+            disabled={isMigrating || !file}
+            aria-busy={isMigrating}
+            onClick={handleMigrate}
+          >
+            {isMigrating ? <Spinner className="size-4" /> : null}
+            {isMigrating ? 'Migrating…' : 'Migrate to database'}
+          </Button>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="csv-upload" className="form-field-label">
+              CSV file
+            </Label>
+            <Input
+              ref={inputRef}
+              id="csv-upload"
+              type="file"
+              accept=".csv,text/csv"
+              disabled={isMigrating}
+              onChange={handleFileChange}
+              className="cursor-pointer file:mr-3"
+            />
+            <p className="text-xs text-muted-foreground">
+              Header row must be on line 5. Accepted format: .csv
+            </p>
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            No file selected yet.
-          </p>
-        )}
 
-        {rows.length > 0 ? (
-          <p className="text-sm text-chart-2">
-            {rows.length} member row{rows.length === 1 ? '' : 's'} parsed
-          </p>
-        ) : null}
-      </CardContent>
+          {file ? (
+            <div className="file-drop-hint surface-muted">
+              <Upload className="size-4 shrink-0 text-chart-2" aria-hidden />
+              <div className="min-w-0">
+                <p className="truncate font-medium text-foreground">{file.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {(file.size / 1024).toFixed(1)} KB ready to migrate
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No file selected yet. Choose a CSV to begin.
+            </p>
+          )}
 
-      <CardFooter className="border-t border-border bg-muted/40 py-4">
-        <Button
-          type="button"
-          className="btn-primary-glow w-full sm:w-auto"
-          disabled={isMigrating}
-          onClick={handleMigrate}
-        >
-          {isMigrating ? <Spinner className="size-4" /> : null}
-          Migrate
-        </Button>
-      </CardFooter>
-      </Card>
+          {rows.length > 0 ? (
+            <p className="text-sm font-medium text-chart-2" role="status">
+              {rows.length} member row{rows.length === 1 ? '' : 's'} parsed and
+              ready
+            </p>
+          ) : null}
+        </div>
+      </SectionCard>
 
       <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
         <DialogContent className="sm:max-w-md">

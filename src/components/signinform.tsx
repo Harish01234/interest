@@ -106,7 +106,7 @@ export function SignInForm() {
 
   return (
     <div className="w-full max-w-md">
-      <Card className="surface-card overflow-hidden border-chart-1/20 bg-card py-0 shadow-[var(--shadow-floating)]">
+      <Card className="surface-card overflow-hidden border-chart-1/20 py-0 shadow-[var(--shadow-floating)]">
         <div aria-hidden className="accent-bar" />
 
         <CardHeader className="items-center gap-4 pt-8 text-center">
@@ -162,7 +162,7 @@ export function SignInForm() {
           )}
         </CardContent>
 
-        <CardFooter className="flex-col gap-4 border-t border-border bg-muted/40 py-6">
+        <CardFooter className="section-card-footer flex-col gap-4 py-6">
           <div className="flex w-full items-center gap-3 text-xs text-muted-foreground">
             <Separator className="flex-1" />
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
