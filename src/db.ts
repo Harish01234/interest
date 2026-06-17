@@ -10,8 +10,22 @@ declare global {
   var __prisma: PrismaClient | undefined
 }
 
-export const prisma = globalThis.__prisma || new PrismaClient({ adapter })
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.__prisma = prisma
+function createPrismaClient() {
+  return new PrismaClient({ adapter })
 }
+
+function getPrismaClient() {
+  const cached = globalThis.__prisma
+
+  // Recreate when the cached client is from an older Prisma schema
+  // (e.g. before Member was added) so delegates like `member` exist.
+  if (cached && 'member' in cached) {
+    return cached
+  }
+
+  const client = createPrismaClient()
+  globalThis.__prisma = client
+  return client
+}
+
+export const prisma = getPrismaClient()

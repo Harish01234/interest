@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { FileSpreadsheet, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { readMemberCsvFromFile, type MemberRecord } from '@/lib/read-csv'
 import { migrateMembers } from '@/members/migration'
+import { membersQueryKey } from '@/members/queries'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -13,15 +15,26 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 
 export function CsvForm() {
+  const queryClient = useQueryClient()
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [rows, setRows] = useState<MemberRecord[]>([])
   const [isMigrating, setIsMigrating] = useState(false)
+  const [successOpen, setSuccessOpen] = useState(false)
+  const [migratedCount, setMigratedCount] = useState(0)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.target.files?.[0] ?? null
@@ -58,6 +71,9 @@ export function CsvForm() {
       setRows(data)
 
       const result = await migrateMembers({ data: { members: data } })
+      setMigratedCount(result.count)
+      setSuccessOpen(true)
+      await queryClient.invalidateQueries({ queryKey: membersQueryKey })
       toast.success(`Migrated ${result.count} member${result.count === 1 ? '' : 's'}`)
     } catch (error) {
       toast.error(
@@ -70,7 +86,8 @@ export function CsvForm() {
   }
 
   return (
-    <Card className="surface-card gap-0 py-0">
+    <>
+      <Card className="surface-card gap-0 py-0">
       <CardHeader className="gap-3">
         <div className="icon-tile icon-tile-chart-2 mb-1">
           <FileSpreadsheet className="size-4.5" />
@@ -128,6 +145,29 @@ export function CsvForm() {
           Migrate
         </Button>
       </CardFooter>
-    </Card>
+      </Card>
+
+      <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Migration complete</DialogTitle>
+            <DialogDescription>
+              Your CSV data has been imported into the database.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="surface-muted rounded-lg border border-border px-4 py-3 text-sm">
+            <p className="font-medium text-foreground">
+              {migratedCount} member{migratedCount === 1 ? '' : 's'} added
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              The members list below has been refreshed automatically.
+            </p>
+          </div>
+
+          <DialogFooter showCloseButton />
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

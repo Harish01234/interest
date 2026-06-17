@@ -3,6 +3,7 @@ import { BarChart3, Users } from 'lucide-react'
 
 import { AppShell } from '@/components/app-shell'
 import { CsvForm } from '@/components/csvform'
+import { MembersPanel } from '@/components/members-panel'
 import { AuthEmptyState } from '@/components/patterns/auth-empty-state'
 import { MiniBarChart } from '@/components/patterns/mini-bar-chart'
 import { PageHeader } from '@/components/patterns/page-header'
@@ -132,6 +133,7 @@ function DashboardPage() {
         </div>
 
         <CsvForm />
+        <MembersPanel />
       </div>
     </AppShell>
   )
