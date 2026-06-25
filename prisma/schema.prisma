@@ -94,7 +94,9 @@ model Member {
   phoneNo    String
   type       MemberType @default(unknown)
   jinsis     String?
+  interest   Int        @default(0)
   active     Boolean    @default(true)
+  settledAt  DateTime?
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   userId     String
@@ -103,5 +105,50 @@ model Member {
   @@index([slNo])
   @@index([active])
   @@index([active, slNo])
+  @@index([settledAt])
   @@map("member")
 }
+
+
+model Calculation {
+  id              Int       @id @default(autoincrement())
+  TotalTobill     Int       @default(0)
+  Asol            Int       @default(0) // sum(credit) of members settled after periodStartedAt
+  Interest        Int       @default(0) // sum(interest) of members settled after periodStartedAt
+  Dewa            Int       @default(0) // sum(credit) of members added after periodStartedAt
+
+  CashInHome      Int       @default(0)
+  CashInShop      Int       @default(0)
+  cashToPersons   Json      @default("[]") // [{ "name": "Ali", "amount": 5000 }, ...]
+
+  periodStartedAt DateTime? // stamped when TotalTobill is set; anchors the period
+
+  CreatedAt       DateTime  @default(now())
+  UpdatedAt       DateTime  @updatedAt
+
+  @@map("calculation")
+}
+
+//if sum(TotalTobill+asol+interest-dewa===cashInHome+cashInShop+cashToPersons) then calculation is correct otherwise it is incorrect
+
+
+model MainCalculation {
+  id Int @id @default(autoincrement())
+  TotalTobill Int
+  interest Int
+  Bandak Int
+  jinisChara Int
+  cash Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("main_calculation")
+}
+
+//if(TotalTobill+interest===Bandak+jinisChara+cash) then calculation is correct otherwise it is incorrect
+
+//main interesing part is cash=here is  sum(TotalTobill+asol+interest-dewa) value which is stored in calculation table
+
+//interest is same as calculation table interest
+
+//other values here user will add

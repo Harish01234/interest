@@ -14,7 +14,9 @@ export const memberSelect = {
   phoneNo: true,
   type: true,
   jinsis: true,
+  interest: true,
   active: true,
+  settledAt: true,
   createdAt: true,
   updatedAt: true,
   user: {
@@ -36,7 +38,9 @@ type RawMember = {
   phoneNo: string
   type: MemberDto['type']
   jinsis: string | null
+  interest: number
   active: boolean
+  settledAt: Date | null
   createdAt: Date
   updatedAt: Date
   user: { id: string; name: string; email: string } | null
@@ -115,12 +119,17 @@ export async function updateMemberImpl(data: {
 
 export async function deleteMemberImpl(data: {
   id: number
+  interest?: number
 }): Promise<{ success: true }> {
   await requireAuthSession()
 
   await prisma.member.update({
     where: { id: data.id },
-    data: { active: false },
+    data: {
+      active: false,
+      interest: Math.trunc(data.interest ?? 0),
+      settledAt: new Date(),
+    },
   })
 
   return { success: true }

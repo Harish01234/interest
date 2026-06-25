@@ -8,6 +8,11 @@ const memberIdSchema = z.object({
   id: z.number().int().positive(),
 })
 
+const deleteMemberInputSchema = z.object({
+  id: z.number().int().positive(),
+  interest: z.number().int().min(0).default(0),
+})
+
 const createMemberInputSchema = memberRecordSchema
 
 const updateMemberInputSchema = z
@@ -38,7 +43,7 @@ export const updateMember = createServerFn({ method: 'POST' })
   })
 
 export const deleteMember = createServerFn({ method: 'POST' })
-  .validator((input: unknown) => memberIdSchema.parse(input))
+  .validator((input: unknown) => deleteMemberInputSchema.parse(input))
   .handler(async ({ data }): Promise<{ success: true }> => {
     const { deleteMemberImpl } = await import('@/members/member.server')
     return deleteMemberImpl(data)

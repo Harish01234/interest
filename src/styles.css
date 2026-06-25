@@ -740,6 +740,45 @@ body {
     opacity: 0.65;
   }
 
+  .recon-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border-subtle);
+    box-shadow: var(--glass-inset);
+  }
+
+  .recon-banner-ok {
+    background: oklch(from var(--chart-1) l c h / 0.12);
+    border-color: oklch(from var(--chart-1) l c h / 0.4);
+    color: oklch(from var(--chart-1) 0.45 c h);
+  }
+
+  .dark .recon-banner-ok {
+    color: oklch(from var(--chart-1) 0.85 c h);
+  }
+
+  .recon-banner-bad {
+    background: oklch(from var(--destructive) l c h / 0.1);
+    border-color: oklch(from var(--destructive) l c h / 0.4);
+    color: oklch(from var(--destructive) 0.5 c h);
+  }
+
+  .dark .recon-banner-bad {
+    color: oklch(from var(--destructive) 0.82 c h);
+  }
+
+  .recon-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--glass-bg-strong);
+    color: var(--muted-foreground);
+  }
+
   .member-audit {
     display: flex;
     flex-direction: column;

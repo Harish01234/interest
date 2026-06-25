@@ -389,7 +389,9 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  Member: 'Member'
+  Member: 'Member',
+  Calculation: 'Calculation',
+  MainCalculation: 'MainCalculation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "todo" | "user" | "session" | "account" | "verification" | "member"
+    modelProps: "todo" | "user" | "session" | "account" | "verification" | "member" | "calculation" | "mainCalculation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -853,6 +855,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Calculation: {
+      payload: Prisma.$CalculationPayload<ExtArgs>
+      fields: Prisma.CalculationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CalculationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CalculationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        findFirst: {
+          args: Prisma.CalculationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CalculationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        findMany: {
+          args: Prisma.CalculationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>[]
+        }
+        create: {
+          args: Prisma.CalculationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        createMany: {
+          args: Prisma.CalculationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CalculationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>[]
+        }
+        delete: {
+          args: Prisma.CalculationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        update: {
+          args: Prisma.CalculationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        deleteMany: {
+          args: Prisma.CalculationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CalculationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CalculationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>[]
+        }
+        upsert: {
+          args: Prisma.CalculationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CalculationPayload>
+        }
+        aggregate: {
+          args: Prisma.CalculationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCalculation>
+        }
+        groupBy: {
+          args: Prisma.CalculationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalculationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CalculationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CalculationCountAggregateOutputType> | number
+        }
+      }
+    }
+    MainCalculation: {
+      payload: Prisma.$MainCalculationPayload<ExtArgs>
+      fields: Prisma.MainCalculationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MainCalculationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MainCalculationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        findFirst: {
+          args: Prisma.MainCalculationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MainCalculationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        findMany: {
+          args: Prisma.MainCalculationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>[]
+        }
+        create: {
+          args: Prisma.MainCalculationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        createMany: {
+          args: Prisma.MainCalculationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MainCalculationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>[]
+        }
+        delete: {
+          args: Prisma.MainCalculationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        update: {
+          args: Prisma.MainCalculationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MainCalculationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MainCalculationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MainCalculationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MainCalculationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MainCalculationPayload>
+        }
+        aggregate: {
+          args: Prisma.MainCalculationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMainCalculation>
+        }
+        groupBy: {
+          args: Prisma.MainCalculationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MainCalculationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MainCalculationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MainCalculationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -969,7 +1119,9 @@ export const MemberScalarFieldEnum = {
   phoneNo: 'phoneNo',
   type: 'type',
   jinsis: 'jinsis',
+  interest: 'interest',
   active: 'active',
+  settledAt: 'settledAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -978,12 +1130,50 @@ export const MemberScalarFieldEnum = {
 export type MemberScalarFieldEnum = (typeof MemberScalarFieldEnum)[keyof typeof MemberScalarFieldEnum]
 
 
+export const CalculationScalarFieldEnum = {
+  id: 'id',
+  TotalTobill: 'TotalTobill',
+  Asol: 'Asol',
+  Interest: 'Interest',
+  Dewa: 'Dewa',
+  CashInHome: 'CashInHome',
+  CashInShop: 'CashInShop',
+  cashToPersons: 'cashToPersons',
+  periodStartedAt: 'periodStartedAt',
+  CreatedAt: 'CreatedAt',
+  UpdatedAt: 'UpdatedAt'
+} as const
+
+export type CalculationScalarFieldEnum = (typeof CalculationScalarFieldEnum)[keyof typeof CalculationScalarFieldEnum]
+
+
+export const MainCalculationScalarFieldEnum = {
+  id: 'id',
+  TotalTobill: 'TotalTobill',
+  interest: 'interest',
+  Bandak: 'Bandak',
+  jinisChara: 'jinisChara',
+  cash: 'cash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MainCalculationScalarFieldEnum = (typeof MainCalculationScalarFieldEnum)[keyof typeof MainCalculationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -1000,6 +1190,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1068,6 +1267,20 @@ export type EnumMemberTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'MemberType[]'
  */
 export type ListEnumMemberTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1200,6 +1413,8 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   member?: Prisma.MemberOmit
+  calculation?: Prisma.CalculationOmit
+  mainCalculation?: Prisma.MainCalculationOmit
 }
 
 /* Types for Logging */

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CalculationRouteImport } from './routes/calculation'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -30,6 +31,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CalculationRoute = CalculationRouteImport.update({
+  id: '/calculation',
+  path: '/calculation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
@@ -65,14 +74,34 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/sessions' | '/signin' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/calculation'
+    | '/dashboard'
+    | '/sessions'
+    | '/signin'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/sessions' | '/signin' | '/api/auth/$'
-  id: '__root__' | '/' | '/dashboard' | '/sessions' | '/signin' | '/api/auth/$'
+  to:
+    | '/'
+    | '/calculation'
+    | '/dashboard'
+    | '/sessions'
+    | '/signin'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/calculation'
+    | '/dashboard'
+    | '/sessions'
+    | '/signin'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalculationRoute: typeof CalculationRoute
   DashboardRoute: typeof DashboardRoute
   SessionsRoute: typeof SessionsRoute
   SigninRoute: typeof SigninRoute
@@ -102,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/calculation': {
+      id: '/calculation'
+      path: '/calculation'
+      fullPath: '/calculation'
+      preLoaderRoute: typeof CalculationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalculationRoute: CalculationRoute,
   DashboardRoute: DashboardRoute,
   SessionsRoute: SessionsRoute,
   SigninRoute: SigninRoute,

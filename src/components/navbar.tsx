@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import { LayoutDashboard, Menu, MonitorSmartphone, Sparkles } from 'lucide-react'
+import {
+  Calculator,
+  LayoutDashboard,
+  Menu,
+  MonitorSmartphone,
+  Sparkles,
+} from 'lucide-react'
 
 import { BrandMark } from '@/components/patterns/brand-mark'
 import HeaderUser from '@/integrations/better-auth/header-user'
@@ -19,6 +25,7 @@ import { cn } from '@/lib/utils'
 const navItems = [
   { to: '/', label: 'Home', icon: Sparkles },
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/calculation', label: 'Calculation', icon: Calculator },
   { to: '/sessions', label: 'Sessions', icon: MonitorSmartphone },
 ] as const
 

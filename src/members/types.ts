@@ -16,7 +16,9 @@ export type MemberDto = {
   phoneNo: string
   type: MemberType
   jinsis: string | null
+  interest: number
   active: boolean
+  settledAt: Date | null
   createdAt: Date
   updatedAt: Date
   createdBy: MemberCreator | null

@@ -71,3 +71,13 @@ export type Verification = Prisma.VerificationModel
  * 
  */
 export type Member = Prisma.MemberModel
+/**
+ * Model Calculation
+ * 
+ */
+export type Calculation = Prisma.CalculationModel
+/**
+ * Model MainCalculation
+ * 
+ */
+export type MainCalculation = Prisma.MainCalculationModel

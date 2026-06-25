@@ -357,6 +357,7 @@ function MemberDetailDialog({
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteInterest, setDeleteInterest] = useState('')
   const [form, setForm] = useState<MemberFormState | null>(null)
 
   useEffect(() => {
@@ -364,6 +365,7 @@ function MemberDetailDialog({
       setForm(memberToForm(member))
       setIsEditing(false)
       setDeleteOpen(false)
+      setDeleteInterest('')
     }
   }, [member])
 
@@ -404,7 +406,14 @@ function MemberDetailDialog({
         throw new Error('Member not found.')
       }
 
-      return deleteMember({ data: { id: member.id } })
+      const interestValue = Number.parseInt(deleteInterest.trim() || '0', 10)
+
+      return deleteMember({
+        data: {
+          id: member.id,
+          interest: Number.isFinite(interestValue) ? Math.max(0, interestValue) : 0,
+        },
+      })
     },
     onSuccess: () => {
       toast.success('Member deleted')
@@ -575,13 +584,37 @@ function MemberDetailDialog({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this member?</AlertDialogTitle>
+            <AlertDialogTitle>Settle &amp; delete this member?</AlertDialogTitle>
             <AlertDialogDescription>
               {member.name} (sl no {member.slNo}) will be removed from the list and
-              excluded from credit totals. The record is kept and can be restored
-              later.
+              excluded from credit totals. Enter the interest collected at
+              settlement — this counts toward the current period.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="space-y-2 py-1">
+            <Label htmlFor="delete-interest">Interest collected</Label>
+            <Input
+              id="delete-interest"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={deleteInterest}
+              disabled={deleteMutation.isPending}
+              onChange={(event) => setDeleteInterest(event.target.value)}
+              placeholder="0"
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  deleteMutation.mutate()
+                }
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank for 0. Member credit ({member.credit}) becomes Asol.
+            </p>
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>
               Cancel
@@ -595,7 +628,7 @@ function MemberDetailDialog({
               }}
             >
               {deleteMutation.isPending ? <Spinner className="size-4" /> : null}
-              Delete member
+              Settle &amp; delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
