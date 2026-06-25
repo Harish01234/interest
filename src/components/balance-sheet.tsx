@@ -192,7 +192,7 @@ type WorksheetPanelProps = {
   title: string
   formula: string
   icon: LucideIcon
-  actions: ReactNode
+  actionGroups?: ReactNode
   isBalanced: boolean
   difference?: number
   children: ReactNode
@@ -204,7 +204,7 @@ export function WorksheetPanel({
   title,
   formula,
   icon,
-  actions,
+  actionGroups,
   isBalanced,
   difference = 0,
   children,
@@ -217,10 +217,9 @@ export function WorksheetPanel({
       iconVariant={variant === 'period' ? 'chart1' : 'chart3'}
       title={title}
       description={formula}
-      actions={actions}
       footer={footer}
       className={cn('calc-worksheet-panel', `calc-worksheet-panel-${variant}`)}
-      bodyClassName="space-y-3 min-w-0"
+      bodyClassName="space-y-4 min-w-0"
     >
       <Badge
         variant="outline"
@@ -236,6 +235,8 @@ export function WorksheetPanel({
         )}
         {isBalanced ? 'Balanced' : `Off by ${formatSheetCell(Math.abs(difference))}`}
       </Badge>
+
+      {actionGroups}
 
       {children}
     </SectionCard>

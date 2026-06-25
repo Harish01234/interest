@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { RotateCcw } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { resetAllCalculations } from '@/members/calculation'
@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
-export function StartFreshCalculationButton() {
+export function ClearAllCalculationsButton() {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
 
@@ -32,10 +32,10 @@ export function StartFreshCalculationButton() {
         mainCalculation,
       )
       setOpen(false)
-      toast.success('All calculations reset')
+      toast.success('All calculations cleared')
     },
     onError: (error) => {
-      toast.error(error instanceof Error ? error.message : 'Failed to reset')
+      toast.error(error instanceof Error ? error.message : 'Failed to clear')
     },
   })
 
@@ -45,28 +45,30 @@ export function StartFreshCalculationButton() {
         type="button"
         variant="outline"
         size="sm"
+        className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
         disabled={resetMutation.isPending}
         onClick={() => setOpen(true)}
       >
-        <RotateCcw className="size-4" />
-        Start fresh
+        <Trash2 className="size-4" />
+        Clear all calculations
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Start fresh?</AlertDialogTitle>
+            <AlertDialogTitle>Clear all calculations?</AlertDialogTitle>
             <AlertDialogDescription>
-              This clears the main calculation (TOBIL, Jinish chara) and the
-              period calculation (Total to bill, manual Asol/Interest/Dewa, cash
-              inputs, and period start). Member records are not changed.
+              This resets the period sheet (TOBILL, cash, manual Asol/Sudh/Dewa)
+              and the main sheet (TOBIL, Jinish chara). The active period will
+              end. Member records are not changed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={resetMutation.isPending}>
-              Cancel
+              Keep current data
             </AlertDialogCancel>
             <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
               disabled={resetMutation.isPending}
               onClick={(event) => {
                 event.preventDefault()
@@ -74,7 +76,7 @@ export function StartFreshCalculationButton() {
               }}
             >
               {resetMutation.isPending ? <Spinner className="size-4" /> : null}
-              Start fresh
+              Yes, clear everything
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -82,3 +84,6 @@ export function StartFreshCalculationButton() {
     </>
   )
 }
+
+/** @deprecated Use ClearAllCalculationsButton */
+export const StartFreshCalculationButton = ClearAllCalculationsButton

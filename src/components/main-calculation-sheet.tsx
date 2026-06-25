@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Scale } from 'lucide-react'
+import { Bookmark, Scale } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -12,6 +12,10 @@ import {
   WorksheetPanel,
 } from '@/components/balance-sheet'
 import { SectionSaveButton } from '@/components/section-save-button'
+import {
+  WorksheetActionGroup,
+  WorksheetActionGroups,
+} from '@/components/worksheet-action-group'
 import { Spinner } from '@/components/ui/spinner'
 import {
   saveMainCalculation,
@@ -61,7 +65,7 @@ export function MainCalculationSheet() {
     onSuccess: (result) => {
       queryClient.setQueryData(mainCalculationQueryOptions.queryKey, result)
       setForm(dtoToForm(result))
-      toast.success('Main calculation saved')
+      toast.success('TOBIL & Jinish chara saved')
     },
     onError: (saveError) => {
       toast.error(
@@ -118,13 +122,22 @@ export function MainCalculationSheet() {
       formula="TOBIL + SUDH = Laptop + Jinish chara + Cash"
       isBalanced={live.isBalanced}
       difference={live.difference}
-      actions={
-        <SectionSaveButton
-          label="Save main"
-          pending={saveMutation.isPending}
-          disabled={isBusy}
-          onClick={() => saveMutation.mutate()}
-        />
+      actionGroups={
+        <WorksheetActionGroups className="worksheet-action-groups-single">
+          <WorksheetActionGroup
+            accent="main"
+            title="Main balance inputs"
+            description="Save TOBIL and Jinish chara. Laptop (active credits), Sudh, and Cash sync from other sheets."
+          >
+            <SectionSaveButton
+              label="Save TOBIL & Jinish chara"
+              icon={Bookmark}
+              pending={saveMutation.isPending}
+              disabled={isBusy}
+              onClick={() => saveMutation.mutate()}
+            />
+          </WorksheetActionGroup>
+        </WorksheetActionGroups>
       }
       footer={
         <p className="text-xs text-muted-foreground">

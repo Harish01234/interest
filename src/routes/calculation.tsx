@@ -3,8 +3,8 @@ import { Calculator } from 'lucide-react'
 
 import { AppShell } from '@/components/app-shell'
 import { CalculationPanel } from '@/components/calculation-panel'
+import { CalculationPeriodToolbar } from '@/components/calculation-period-toolbar'
 import { CalculationWorksheet } from '@/components/calculation-worksheet'
-import { StartFreshCalculationButton } from '@/components/start-fresh-calculation-button'
 import { AuthEmptyState } from '@/components/patterns/auth-empty-state'
 import { PageHeader } from '@/components/patterns/page-header'
 import { authClient } from '@/lib/auth-client'
@@ -42,9 +42,9 @@ function CalculationPage() {
           badge="Calculation"
           badgeVariant="primary"
           title="Period calculation"
-          description="Reconcile your overall balance sheet (TOBIL / SUDH vs Laptop / Cash) and the period calculation against cash on hand."
-          actions={<StartFreshCalculationButton />}
+          description="Track the billing period against cash on hand, then reconcile the main balance sheet (TOBIL / SUDH vs Laptop / Cash)."
         />
+        <CalculationPeriodToolbar />
         <CalculationWorksheet />
         <CalculationPanel />
       </div>

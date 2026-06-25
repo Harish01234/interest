@@ -1071,6 +1071,170 @@ body {
     border-top: 1px solid oklch(from var(--border) l c h / 0.7);
   }
 
+  .worksheet-action-groups {
+    display: grid;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .worksheet-action-groups:not(.worksheet-action-groups-single) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .worksheet-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg-strong);
+    min-width: 0;
+  }
+
+  .worksheet-action-group-period {
+    border-color: oklch(from var(--chart-1) l c h / 0.28);
+    background: oklch(from var(--chart-1) l c h / 0.06);
+  }
+
+  .worksheet-action-group-main {
+    border-color: oklch(from var(--chart-3) l c h / 0.28);
+    background: oklch(from var(--chart-3) l c h / 0.06);
+  }
+
+  .worksheet-action-group-neutral {
+    background: var(--glass-bg);
+  }
+
+  .worksheet-action-group-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .worksheet-action-group-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--foreground);
+  }
+
+  .worksheet-action-group-description {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+  }
+
+  .worksheet-action-group-control {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .worksheet-action-group-control .btn-primary-glow,
+  .worksheet-action-group-control button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  @media (min-width: 480px) {
+    .worksheet-action-group-control .btn-primary-glow,
+    .worksheet-action-group-control button {
+      width: auto;
+    }
+  }
+
+  .calc-period-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.125rem;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg-strong);
+    box-shadow: var(--shadow-elevated), var(--glass-inset);
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .calc-period-toolbar {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+  }
+
+  .calc-period-toolbar-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .calc-period-toolbar-hint {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+    max-width: 36rem;
+  }
+
+  .calc-period-toolbar-reset {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px dashed oklch(from var(--destructive) l c h / 0.35);
+    background: oklch(from var(--destructive) l c h / 0.04);
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .calc-period-toolbar-reset {
+      max-width: 18rem;
+      flex-shrink: 0;
+    }
+  }
+
+  .calc-period-toolbar-reset-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  .calc-period-toolbar-reset-hint {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+    margin-bottom: 0.25rem;
+  }
+
+  .calc-period-badge-active {
+    color: oklch(from var(--chart-2) 0.42 c h);
+    background: oklch(from var(--chart-2) l c h / 0.12);
+    border-color: oklch(from var(--chart-2) l c h / 0.3);
+  }
+
+  .dark .calc-period-badge-active {
+    color: oklch(from var(--chart-2) 0.88 c h);
+  }
+
+  .calc-period-badge-inactive {
+    color: oklch(from var(--chart-4) 0.42 c h);
+    background: oklch(from var(--chart-4) l c h / 0.12);
+    border-color: oklch(from var(--chart-4) l c h / 0.3);
+  }
+
+  .dark .calc-period-badge-inactive {
+    color: oklch(from var(--chart-4) 0.88 c h);
+  }
+
   .balance-sheet-hint {
     font-size: 0.8125rem;
     line-height: 1.5;

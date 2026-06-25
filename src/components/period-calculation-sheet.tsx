@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Calculator, Plus, Trash2 } from 'lucide-react'
+import { Banknote, Calculator, PenLine, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -14,6 +14,10 @@ import {
   WorksheetPanel,
 } from '@/components/balance-sheet'
 import { SectionSaveButton } from '@/components/section-save-button'
+import {
+  WorksheetActionGroup,
+  WorksheetActionGroups,
+} from '@/components/worksheet-action-group'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import {
@@ -77,7 +81,7 @@ export function PeriodCalculationSheet() {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
       queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
-      toast.success('Period totals saved')
+      toast.success('Manual Asol, Sudh & Dewa saved')
     },
     onError: (saveError) => {
       toast.error(
@@ -107,7 +111,7 @@ export function PeriodCalculationSheet() {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
       queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
-      toast.success('Cash & period saved')
+      toast.success('TOBILL & cash saved')
     },
     onError: (saveError) => {
       toast.error(
@@ -235,49 +239,51 @@ export function PeriodCalculationSheet() {
     <WorksheetPanel
       variant="period"
       icon={Calculator}
-      title="Calculation"
-      formula="ToBill + Asol + Interest − Dewa = Cash"
+      title="Period calculation"
+      formula="ToBill + Asol + Interest − Dewa = Cash on hand"
       isBalanced={live.isBalanced}
       difference={live.difference}
-      actions={
-        <>
-          <SectionSaveButton
-            label="Save totals"
-            pending={saveTotalsMutation.isPending}
-            disabled={isBusy}
-            onClick={() => saveTotalsMutation.mutate()}
-          />
-          <SectionSaveButton
-            label="Save cash"
-            pending={saveCashMutation.isPending}
-            disabled={isBusy}
-            onClick={() => saveCashMutation.mutate()}
-          />
-        </>
+      actionGroups={
+        <WorksheetActionGroups>
+          <WorksheetActionGroup
+            accent="period"
+            title="Manual adjustments"
+            description="Save your manual Asol, Sudh (interest), and Dewa entries. Member credits are added automatically."
+          >
+            <SectionSaveButton
+              label="Save Asol, Sudh & Dewa"
+              icon={PenLine}
+              pending={saveTotalsMutation.isPending}
+              disabled={isBusy}
+              onClick={() => saveTotalsMutation.mutate()}
+            />
+          </WorksheetActionGroup>
+          <WorksheetActionGroup
+            accent="period"
+            title="Billing & cash on hand"
+            description="Save TOBILL, home/shop cash, and person payments. Entering TOBILL starts the billing period."
+          >
+            <SectionSaveButton
+              label="Save TOBILL & cash"
+              icon={Banknote}
+              pending={saveCashMutation.isPending}
+              disabled={isBusy}
+              onClick={() => saveCashMutation.mutate()}
+            />
+          </WorksheetActionGroup>
+        </WorksheetActionGroups>
       }
       footer={
-        <div className="flex w-full flex-wrap items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isBusy}
-            onClick={addPerson}
-          >
-            <Plus className="size-4" />
-            Add person
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            Period:{' '}
-            {data?.periodStartedAt
-              ? new Date(data.periodStartedAt).toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })
-              : 'Not started — save TOBILL to begin'}
-          </span>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isBusy}
+          onClick={addPerson}
+        >
+          <Plus className="size-4" />
+          Add cash recipient
+        </Button>
       }
     >
       <BalanceSheetScroll minWidth={580} label="Period calculation">
