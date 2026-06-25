@@ -14,9 +14,43 @@ export const memberSelect = {
   phoneNo: true,
   type: true,
   jinsis: true,
+  active: true,
   createdAt: true,
   updatedAt: true,
+  user: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  },
 } as const
+
+type RawMember = {
+  id: number
+  slNo: string
+  name: string
+  fatherName: string
+  credit: string
+  date: string
+  phoneNo: string
+  type: MemberDto['type']
+  jinsis: string | null
+  active: boolean
+  createdAt: Date
+  updatedAt: Date
+  user: { id: string; name: string; email: string } | null
+}
+
+export function toMemberDto(member: RawMember): MemberDto {
+  const { user, ...rest } = member
+  return {
+    ...rest,
+    createdBy: user
+      ? { id: user.id, name: user.name, email: user.email }
+      : null,
+  }
+}
 
 export async function getMemberImpl(data: {
   id: number
@@ -32,7 +66,7 @@ export async function getMemberImpl(data: {
     throw new Error('Member not found.')
   }
 
-  return { member }
+  return { member: toMemberDto(member) }
 }
 
 export async function createMemberImpl(
@@ -55,7 +89,7 @@ export async function createMemberImpl(
     select: memberSelect,
   })
 
-  return { member }
+  return { member: toMemberDto(member) }
 }
 
 export async function updateMemberImpl(data: {
@@ -66,7 +100,7 @@ export async function updateMemberImpl(data: {
   const { id, ...fields } = data
 
   const member = await prisma.member.update({
-    where: { id },
+    where: { id, active: true },
     data: {
       ...fields,
       ...(fields.jinsis !== undefined
@@ -76,7 +110,7 @@ export async function updateMemberImpl(data: {
     select: memberSelect,
   })
 
-  return { member }
+  return { member: toMemberDto(member) }
 }
 
 export async function deleteMemberImpl(data: {
@@ -84,8 +118,9 @@ export async function deleteMemberImpl(data: {
 }): Promise<{ success: true }> {
   await requireAuthSession()
 
-  await prisma.member.delete({
+  await prisma.member.update({
     where: { id: data.id },
+    data: { active: false },
   })
 
   return { success: true }

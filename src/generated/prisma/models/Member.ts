@@ -44,6 +44,7 @@ export type MemberMinAggregateOutputType = {
   phoneNo: string | null
   type: $Enums.MemberType | null
   jinsis: string | null
+  active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -59,6 +60,7 @@ export type MemberMaxAggregateOutputType = {
   phoneNo: string | null
   type: $Enums.MemberType | null
   jinsis: string | null
+  active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -74,6 +76,7 @@ export type MemberCountAggregateOutputType = {
   phoneNo: number
   type: number
   jinsis: number
+  active: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -99,6 +102,7 @@ export type MemberMinAggregateInputType = {
   phoneNo?: true
   type?: true
   jinsis?: true
+  active?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -114,6 +118,7 @@ export type MemberMaxAggregateInputType = {
   phoneNo?: true
   type?: true
   jinsis?: true
+  active?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -129,6 +134,7 @@ export type MemberCountAggregateInputType = {
   phoneNo?: true
   type?: true
   jinsis?: true
+  active?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -231,6 +237,7 @@ export type MemberGroupByOutputType = {
   phoneNo: string
   type: $Enums.MemberType
   jinsis: string | null
+  active: boolean
   createdAt: Date
   updatedAt: Date
   userId: string
@@ -269,6 +276,7 @@ export type MemberWhereInput = {
   phoneNo?: Prisma.StringFilter<"Member"> | string
   type?: Prisma.EnumMemberTypeFilter<"Member"> | $Enums.MemberType
   jinsis?: Prisma.StringNullableFilter<"Member"> | string | null
+  active?: Prisma.BoolFilter<"Member"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   userId?: Prisma.StringFilter<"Member"> | string
@@ -285,6 +293,7 @@ export type MemberOrderByWithRelationInput = {
   phoneNo?: Prisma.SortOrder
   type?: Prisma.SortOrder
   jinsis?: Prisma.SortOrderInput | Prisma.SortOrder
+  active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -304,6 +313,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   phoneNo?: Prisma.StringFilter<"Member"> | string
   type?: Prisma.EnumMemberTypeFilter<"Member"> | $Enums.MemberType
   jinsis?: Prisma.StringNullableFilter<"Member"> | string | null
+  active?: Prisma.BoolFilter<"Member"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   userId?: Prisma.StringFilter<"Member"> | string
@@ -320,6 +330,7 @@ export type MemberOrderByWithAggregationInput = {
   phoneNo?: Prisma.SortOrder
   type?: Prisma.SortOrder
   jinsis?: Prisma.SortOrderInput | Prisma.SortOrder
+  active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -343,6 +354,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   phoneNo?: Prisma.StringWithAggregatesFilter<"Member"> | string
   type?: Prisma.EnumMemberTypeWithAggregatesFilter<"Member"> | $Enums.MemberType
   jinsis?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
+  active?: Prisma.BoolWithAggregatesFilter<"Member"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Member"> | Date | string
   userId?: Prisma.StringWithAggregatesFilter<"Member"> | string
@@ -357,6 +369,7 @@ export type MemberCreateInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMembersInput
@@ -372,6 +385,7 @@ export type MemberUncheckedCreateInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
@@ -386,6 +400,7 @@ export type MemberUpdateInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMembersNestedInput
@@ -401,6 +416,7 @@ export type MemberUncheckedUpdateInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -416,6 +432,7 @@ export type MemberCreateManyInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
@@ -430,6 +447,7 @@ export type MemberUpdateManyMutationInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -444,6 +462,7 @@ export type MemberUncheckedUpdateManyInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -469,6 +488,7 @@ export type MemberCountOrderByAggregateInput = {
   phoneNo?: Prisma.SortOrder
   type?: Prisma.SortOrder
   jinsis?: Prisma.SortOrder
+  active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -488,6 +508,7 @@ export type MemberMaxOrderByAggregateInput = {
   phoneNo?: Prisma.SortOrder
   type?: Prisma.SortOrder
   jinsis?: Prisma.SortOrder
+  active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -503,6 +524,7 @@ export type MemberMinOrderByAggregateInput = {
   phoneNo?: Prisma.SortOrder
   type?: Prisma.SortOrder
   jinsis?: Prisma.SortOrder
+  active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -567,6 +589,7 @@ export type MemberCreateWithoutUserInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -581,6 +604,7 @@ export type MemberUncheckedCreateWithoutUserInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -624,6 +648,7 @@ export type MemberScalarWhereInput = {
   phoneNo?: Prisma.StringFilter<"Member"> | string
   type?: Prisma.EnumMemberTypeFilter<"Member"> | $Enums.MemberType
   jinsis?: Prisma.StringNullableFilter<"Member"> | string | null
+  active?: Prisma.BoolFilter<"Member"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Member"> | Date | string
   userId?: Prisma.StringFilter<"Member"> | string
@@ -639,6 +664,7 @@ export type MemberCreateManyUserInput = {
   phoneNo: string
   type?: $Enums.MemberType
   jinsis?: string | null
+  active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -652,6 +678,7 @@ export type MemberUpdateWithoutUserInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -666,6 +693,7 @@ export type MemberUncheckedUpdateWithoutUserInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -680,6 +708,7 @@ export type MemberUncheckedUpdateManyWithoutUserInput = {
   phoneNo?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMemberTypeFieldUpdateOperationsInput | $Enums.MemberType
   jinsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -696,6 +725,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   phoneNo?: boolean
   type?: boolean
   jinsis?: boolean
+  active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -712,6 +742,7 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   phoneNo?: boolean
   type?: boolean
   jinsis?: boolean
+  active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -728,6 +759,7 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   phoneNo?: boolean
   type?: boolean
   jinsis?: boolean
+  active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -744,12 +776,13 @@ export type MemberSelectScalar = {
   phoneNo?: boolean
   type?: boolean
   jinsis?: boolean
+  active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slNo" | "name" | "fatherName" | "credit" | "date" | "phoneNo" | "type" | "jinsis" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slNo" | "name" | "fatherName" | "credit" | "date" | "phoneNo" | "type" | "jinsis" | "active" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -775,6 +808,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     phoneNo: string
     type: $Enums.MemberType
     jinsis: string | null
+    active: boolean
     createdAt: Date
     updatedAt: Date
     userId: string
@@ -1211,6 +1245,7 @@ export interface MemberFieldRefs {
   readonly phoneNo: Prisma.FieldRef<"Member", 'String'>
   readonly type: Prisma.FieldRef<"Member", 'MemberType'>
   readonly jinsis: Prisma.FieldRef<"Member", 'String'>
+  readonly active: Prisma.FieldRef<"Member", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Member", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Member", 'String'>

@@ -740,6 +740,24 @@ body {
     opacity: 0.65;
   }
 
+  .member-audit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg);
+  }
+
+  .member-audit-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+
   .members-filter-options {
     display: flex;
     flex-direction: column;

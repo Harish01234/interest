@@ -1,5 +1,11 @@
 import type { MemberType } from '@/lib/read-csv'
 
+export type MemberCreator = {
+  id: string
+  name: string
+  email: string
+}
+
 export type MemberDto = {
   id: number
   slNo: string
@@ -10,8 +16,10 @@ export type MemberDto = {
   phoneNo: string
   type: MemberType
   jinsis: string | null
+  active: boolean
   createdAt: Date
   updatedAt: Date
+  createdBy: MemberCreator | null
 }
 
 export type GetMembersParams = {

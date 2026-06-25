@@ -94,11 +94,14 @@ model Member {
   phoneNo    String
   type       MemberType @default(unknown)
   jinsis     String?
+  active     Boolean    @default(true)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   userId     String
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)  
 
   @@index([slNo])
+  @@index([active])
+  @@index([active, slNo])
   @@map("member")
 }

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  CalendarClock,
   Coins,
   Eye,
   Pencil,
   Plus,
   RefreshCw,
   Trash2,
+  UserRound,
   Users,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -325,6 +327,21 @@ function memberToForm(member: MemberDto): MemberFormState {
   }
 }
 
+function formatDateTime(value: Date | string) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return '—'
+  }
+
+  return date.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 function MemberDetailDialog({
   member,
   open,
@@ -475,6 +492,33 @@ function MemberDetailDialog({
                 </div>
               ))}
             </div>
+
+            {!isEditing ? (
+              <div className="member-audit">
+                <div className="member-audit-row">
+                  <UserRound className="size-4 text-muted-foreground" aria-hidden />
+                  <span className="text-muted-foreground">Added by</span>
+                  <span className="font-medium text-foreground">
+                    {member.createdBy?.name ?? 'Unknown'}
+                  </span>
+                  {member.createdBy?.email ? (
+                    <span className="text-xs text-muted-foreground">
+                      ({member.createdBy.email})
+                    </span>
+                  ) : null}
+                </div>
+                <div className="member-audit-row">
+                  <CalendarClock
+                    className="size-4 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <span className="text-muted-foreground">Added on</span>
+                  <span className="font-medium text-foreground">
+                    {formatDateTime(member.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <DialogFooter className="gap-2 sm:justify-between">
@@ -533,7 +577,9 @@ function MemberDetailDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this member?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove {member.name} (sl no {member.slNo}).
+              {member.name} (sl no {member.slNo}) will be removed from the list and
+              excluded from credit totals. The record is kept and can be restored
+              later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -802,6 +848,7 @@ export function MembersPanel() {
                   <TableHead>Father&apos;s name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Added by</TableHead>
                   <TableHead className="text-right">Credit</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -820,6 +867,9 @@ export function MembersPanel() {
                     <TableCell>{member.phoneNo}</TableCell>
                     <TableCell>
                       <MemberTypeBadge type={member.type} />
+                    </TableCell>
+                    <TableCell className="max-w-40 truncate text-muted-foreground">
+                      {member.createdBy?.name ?? 'Unknown'}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
                       {member.credit}
@@ -844,7 +894,7 @@ export function MembersPanel() {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={5}>Page subtotal</TableCell>
+                  <TableCell colSpan={6}>Page subtotal</TableCell>
                   <TableCell className="text-right text-chart-1 tabular-nums">
                     {pageCreditFormatted}
                   </TableCell>
@@ -935,8 +985,9 @@ export function MembersPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete all members?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove all {allMembersCount} member records from the
-              database. This action cannot be undone.
+              This will remove all {allMembersCount} member records from the list and
+              exclude them from credit totals. The records are kept and can be
+              restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

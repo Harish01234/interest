@@ -152,6 +152,7 @@ export const MemberScalarFieldEnum = {
   phoneNo: 'phoneNo',
   type: 'type',
   jinsis: 'jinsis',
+  active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'

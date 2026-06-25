@@ -8,7 +8,7 @@ import {
   parseCredit,
 } from '@/members/credit'
 import { requireAuthSession } from '@/members/auth.server'
-import { memberSelect } from '@/members/member.server'
+import { memberSelect, toMemberDto } from '@/members/member.server'
 import type {
   DeleteAllMembersResult,
   GetMembersParams,
@@ -26,6 +26,7 @@ function buildMembersWhere(filters: {
   const fatherName = filters.fatherName.trim()
 
   return {
+    active: true,
     ...(filters.type !== 'all' ? { type: filters.type } : {}),
     ...(name
       ? { name: { contains: name, mode: 'insensitive' as const } }
@@ -83,6 +84,7 @@ export async function getMembersImpl(
   const members = pageIds
     .map((id) => membersById.get(id))
     .filter((member): member is NonNullable<typeof member> => member != null)
+    .map(toMemberDto)
 
   return {
     members,
@@ -101,6 +103,7 @@ export async function sumAllCreditsImpl(): Promise<SumAllCreditsResult> {
   await requireAuthSession()
 
   const members = await prisma.member.findMany({
+    where: { active: true },
     select: { credit: true },
   })
 
@@ -141,7 +144,10 @@ export async function migrateMembersImpl(data: {
 export async function deleteAllMembersImpl(): Promise<DeleteAllMembersResult> {
   await requireAuthSession()
 
-  const result = await prisma.member.deleteMany()
+  const result = await prisma.member.updateMany({
+    where: { active: true },
+    data: { active: false },
+  })
 
   return { count: result.count }
 }
