@@ -27,6 +27,7 @@ export type MemberDto = {
 export type GetMembersParams = {
   page: number
   pageSize: number
+  slNo: string
   name: string
   fatherName: string
   credit: string

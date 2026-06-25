@@ -27,17 +27,20 @@ const pageSizeOptions = [10, 20, 50] as const
 type TypeFilter = GetMembersParams['type']
 
 type SearchFilters = {
+  slNo: string
   name: string
   fatherName: string
   credit: string
 }
 
 type MembersFilterPanelProps = {
+  slNo: string
   name: string
   fatherName: string
   credit: string
   type: TypeFilter
   pageSize: (typeof pageSizeOptions)[number]
+  onSlNoChange: (value: string) => void
   onNameChange: (value: string) => void
   onFatherNameChange: (value: string) => void
   onCreditChange: (value: string) => void
@@ -90,6 +93,9 @@ type ActiveFilterChip = {
 function getActiveFilters(filters: SearchFilters): ActiveFilterChip[] {
   const chips: ActiveFilterChip[] = []
 
+  if (filters.slNo.trim()) {
+    chips.push({ key: 'slNo', label: 'Sl no', value: filters.slNo.trim() })
+  }
   if (filters.name.trim()) {
     chips.push({ key: 'name', label: 'Name', value: filters.name.trim() })
   }
@@ -108,11 +114,13 @@ function getActiveFilters(filters: SearchFilters): ActiveFilterChip[] {
 }
 
 export function MembersFilterPanel({
+  slNo,
   name,
   fatherName,
   credit,
   type,
   pageSize,
+  onSlNoChange,
   onNameChange,
   onFatherNameChange,
   onCreditChange,
@@ -120,10 +128,11 @@ export function MembersFilterPanel({
   onPageSizeChange,
   onClearFilters,
 }: MembersFilterPanelProps) {
-  const activeFilters = getActiveFilters({ name, fatherName, credit })
+  const activeFilters = getActiveFilters({ slNo, name, fatherName, credit })
   const hasActiveFilters = activeFilters.length > 0
 
   const clearField = (key: keyof SearchFilters) => {
+    if (key === 'slNo') onSlNoChange('')
     if (key === 'name') onNameChange('')
     if (key === 'fatherName') onFatherNameChange('')
     if (key === 'credit') onCreditChange('')
@@ -144,7 +153,7 @@ export function MembersFilterPanel({
               Search members
             </h3>
             <p className="text-sm text-muted-foreground">
-              Narrow results by name, father&apos;s name, or credit.
+              Narrow results by sl no, name, father&apos;s name, or credit.
             </p>
           </div>
         </div>
@@ -165,6 +174,13 @@ export function MembersFilterPanel({
       </div>
 
       <div className="members-filter-grid">
+        <FilterField
+          id="filter-sl-no"
+          label="Sl no"
+          value={slNo}
+          placeholder="e.g. 101"
+          onChange={onSlNoChange}
+        />
         <FilterField
           id="filter-name"
           label="Name"

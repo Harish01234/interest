@@ -641,10 +641,12 @@ function MemberDetailDialog({
 
 export function MembersPanel() {
   const queryClient = useQueryClient()
+  const [slNoFilter, setSlNoFilter] = useState('')
   const [nameFilter, setNameFilter] = useState('')
   const [fatherNameFilter, setFatherNameFilter] = useState('')
   const [creditFilter, setCreditFilter] = useState('')
   const [debouncedFilters, setDebouncedFilters] = useState({
+    slNo: '',
     name: '',
     fatherName: '',
     credit: '',
@@ -659,6 +661,7 @@ export function MembersPanel() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setDebouncedFilters({
+        slNo: slNoFilter,
         name: nameFilter,
         fatherName: fatherNameFilter,
         credit: creditFilter,
@@ -667,12 +670,13 @@ export function MembersPanel() {
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [nameFilter, fatherNameFilter, creditFilter])
+  }, [slNoFilter, nameFilter, fatherNameFilter, creditFilter])
 
   const queryParams = useMemo(
     () => ({
       page,
       pageSize,
+      slNo: debouncedFilters.slNo,
       name: debouncedFilters.name,
       fatherName: debouncedFilters.fatherName,
       credit: debouncedFilters.credit,
@@ -725,6 +729,7 @@ export function MembersPanel() {
   const rangeEnd = Math.min(page * pageSize, total)
 
   const activeFilterCount = [
+    debouncedFilters.slNo.trim(),
     debouncedFilters.name.trim(),
     debouncedFilters.fatherName.trim(),
     debouncedFilters.credit.trim(),
@@ -734,6 +739,7 @@ export function MembersPanel() {
   const hasAnyFilters = hasSearchFilters || typeFilter !== 'all'
 
   const clearSearchFilters = () => {
+    setSlNoFilter('')
     setNameFilter('')
     setFatherNameFilter('')
     setCreditFilter('')
@@ -786,11 +792,13 @@ export function MembersPanel() {
         bodyClassName="space-y-4"
       >
         <MembersFilterPanel
+          slNo={slNoFilter}
           name={nameFilter}
           fatherName={fatherNameFilter}
           credit={creditFilter}
           type={typeFilter}
           pageSize={pageSize}
+          onSlNoChange={setSlNoFilter}
           onNameChange={setNameFilter}
           onFatherNameChange={setFatherNameFilter}
           onCreditChange={setCreditFilter}
@@ -871,7 +879,7 @@ export function MembersPanel() {
               <EmptyDescription>
                 {total === 0 && !hasAnyFilters
                   ? 'Import a CSV file or add a member manually to get started.'
-                  : 'Try different name, father\'s name, or credit filters.'}
+                  : 'Try different sl no, name, father\'s name, or credit filters.'}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

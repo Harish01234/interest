@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, LayoutGrid, XCircle } from 'lucide-react'
+import { CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { SectionCard } from '@/components/patterns/section-card'
+import {
+  BalanceSheetRow,
+  formatSheetCell,
+  parseSheetAmount,
+  SheetNumberInput,
+} from '@/components/balance-sheet'
+import { SectionSaveButton } from '@/components/section-save-button'
+import { Spinner } from '@/components/ui/spinner'
 import {
   saveMainCalculation,
   type MainCalculationDto,
@@ -11,19 +18,7 @@ import {
 import { mainCalculationQueryOptions } from '@/members/main-calculation-queries'
 import { calculationQueryOptions } from '@/members/calculation-queries'
 import { creditSumQueryOptions } from '@/members/queries'
-import { SectionSaveButton } from '@/components/section-save-button'
-import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
-
-function formatCell(value: number) {
-  return value.toLocaleString('en-IN')
-}
-
-function parseAmount(value: string) {
-  const parsed = Number.parseInt(value.replace(/,/g, '').trim() || '0', 10)
-  return Number.isFinite(parsed) ? parsed : 0
-}
 
 type MainFormState = {
   totalToBill: string
@@ -35,58 +30,6 @@ function dtoToForm(dto: MainCalculationDto): MainFormState {
     totalToBill: String(dto.totalToBill ?? 0),
     jinisChara: String(dto.jinisChara ?? 0),
   }
-}
-
-type SheetRowProps = {
-  leftLabel?: string
-  leftValue?: React.ReactNode
-  leftInput?: React.ReactNode
-  rightLabel?: string
-  rightValue?: React.ReactNode
-  rightInput?: React.ReactNode
-  isTotal?: boolean
-  isSpacer?: boolean
-}
-
-function SheetRow({
-  leftLabel,
-  leftValue,
-  leftInput,
-  rightLabel,
-  rightValue,
-  rightInput,
-  isTotal = false,
-  isSpacer = false,
-}: SheetRowProps) {
-  if (isSpacer) {
-    return (
-      <div className="balance-sheet-row balance-sheet-spacer" aria-hidden>
-        <div className="balance-sheet-label" />
-        <div className="balance-sheet-value" />
-        <div className="balance-sheet-label" />
-        <div className="balance-sheet-value" />
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className={cn('balance-sheet-row', isTotal && 'balance-sheet-row-total')}
-    >
-      <div className="balance-sheet-label">{leftLabel}</div>
-      <div className="balance-sheet-value">
-        {leftInput ?? (
-          <span className="balance-sheet-number">{leftValue}</span>
-        )}
-      </div>
-      <div className="balance-sheet-label">{rightLabel}</div>
-      <div className="balance-sheet-value">
-        {rightInput ?? (
-          <span className="balance-sheet-number">{rightValue}</span>
-        )}
-      </div>
-    </div>
-  )
 }
 
 export function MainCalculationSheet() {
@@ -105,14 +48,12 @@ export function MainCalculationSheet() {
 
   const saveMutation = useMutation({
     mutationFn: () => {
-      if (!form) {
-        throw new Error('Form is not ready.')
-      }
+      if (!form) throw new Error('Form is not ready.')
 
       return saveMainCalculation({
         data: {
-          totalToBill: parseAmount(form.totalToBill),
-          jinisChara: parseAmount(form.jinisChara),
+          totalToBill: parseSheetAmount(form.totalToBill),
+          jinisChara: parseSheetAmount(form.jinisChara),
         },
       })
     },
@@ -129,9 +70,9 @@ export function MainCalculationSheet() {
   })
 
   const live = useMemo(() => {
-    const totalToBill = form ? parseAmount(form.totalToBill) : 0
+    const totalToBill = form ? parseSheetAmount(form.totalToBill) : 0
     const bandak = creditSumData?.total ?? data?.bandak ?? 0
-    const jinisChara = form ? parseAmount(form.jinisChara) : 0
+    const jinisChara = form ? parseSheetAmount(form.jinisChara) : 0
     const interest = periodData?.interest ?? data?.interest ?? 0
     const cash = periodData?.leftTotal ?? data?.cash ?? 0
 
@@ -152,7 +93,7 @@ export function MainCalculationSheet() {
 
   if (isLoading || !form) {
     return (
-      <div className="loading-panel" role="status" aria-label="Loading main calculation">
+      <div className="calc-worksheet-panel loading-panel" role="status">
         <Spinner className="size-6 text-primary" />
       </div>
     )
@@ -160,118 +101,115 @@ export function MainCalculationSheet() {
 
   if (error) {
     return (
-      <SectionCard
-        icon={LayoutGrid}
-        iconVariant="chart2"
-        title="Could not load main calculation"
-        description={
-          error instanceof Error ? error.message : 'Something went wrong.'
-        }
-      />
+      <div className="calc-worksheet-panel calc-worksheet-panel-error">
+        {error instanceof Error ? error.message : 'Could not load main calculation.'}
+      </div>
     )
   }
 
   const isBusy = saveMutation.isPending
 
-  const numberInput = (
-    id: string,
-    value: string,
-    onChange: (v: string) => void,
-  ) => (
-    <Input
-      id={id}
-      type="text"
-      inputMode="numeric"
-      className="balance-sheet-input"
-      value={value}
-      disabled={isBusy}
-      onChange={(event) => onChange(event.target.value)}
-    />
-  )
-
   return (
-    <SectionCard
-      icon={LayoutGrid}
-      iconVariant="chart2"
-      title="Main calculation"
-      description="Overall balance: TOBIL + SUDH (interest) must equal Laptop + Jinish chara + Cash. Laptop, SUDH, and Cash update automatically from members and the period calculation."
-      actions={
+    <div className="calc-worksheet-panel">
+      <div className="calc-worksheet-panel-header">
+        <div>
+          <h3 className="calc-worksheet-panel-title">Main calculation</h3>
+          <p className="calc-worksheet-panel-desc">
+            TOBIL + SUDH = Laptop + Jinish chara + Cash
+          </p>
+        </div>
         <SectionSaveButton
           label="Save main"
           pending={saveMutation.isPending}
           disabled={isBusy}
           onClick={() => saveMutation.mutate()}
         />
-      }
-      bodyClassName="space-y-4"
-    >
+      </div>
+
       <div
         className={cn(
-          'recon-banner mb-1',
+          'calc-worksheet-recon',
           live.isBalanced ? 'recon-banner-ok' : 'recon-banner-bad',
         )}
         role="status"
-        aria-live="polite"
       >
-        <div className="flex items-center gap-3">
-          {live.isBalanced ? (
-            <CheckCircle2 className="size-5 shrink-0" aria-hidden />
-          ) : (
-            <XCircle className="size-5 shrink-0" aria-hidden />
-          )}
-          <p className="text-sm font-semibold">
-            {live.isBalanced
-              ? 'Main calculation is correct'
-              : `Off by ${formatCell(Math.abs(live.difference))}`}
-          </p>
-        </div>
-        <span className="text-xs opacity-90">VAL1 = VAL2</span>
+        {live.isBalanced ? (
+          <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+        ) : (
+          <XCircle className="size-4 shrink-0" aria-hidden />
+        )}
+        <span className="text-xs font-semibold">
+          {live.isBalanced
+            ? 'Balanced'
+            : `Off by ${formatSheetCell(Math.abs(live.difference))}`}
+        </span>
       </div>
 
       <div className="balance-sheet-wrap">
         <div
-          className="balance-sheet-grid"
+          className="balance-sheet-grid balance-sheet-grid-main"
           role="table"
           aria-label="Main calculation balance sheet"
         >
-          <SheetRow
+          <BalanceSheetRow
             leftLabel="TOBIL"
+            leftLabelTheme="main"
+            rightLabelTheme="main"
+            leftInput={
+              <SheetNumberInput
+                id="main-tobil"
+                value={form.totalToBill}
+                disabled={isBusy}
+                onChange={(value) =>
+                  setForm((c) => (c ? { ...c, totalToBill: value } : c))
+                }
+              />
+            }
             rightLabel="LAPTOP"
-            leftInput={numberInput('main-tobil', form.totalToBill, (v) =>
-              setForm((c) => (c ? { ...c, totalToBill: v } : c)),
-            )}
-            rightValue={formatCell(live.bandak)}
+            rightValue={formatSheetCell(live.bandak)}
           />
-          <SheetRow
+          <BalanceSheetRow
             leftLabel="SUDH"
-            leftValue={formatCell(live.interest)}
+            leftLabelTheme="main"
+            rightLabelTheme="main"
+            leftValue={formatSheetCell(live.interest)}
             rightLabel="JINISH CHARA"
-            rightInput={numberInput('main-jinish', form.jinisChara, (v) =>
-              setForm((c) => (c ? { ...c, jinisChara: v } : c)),
-            )}
+            rightInput={
+              <SheetNumberInput
+                id="main-jinish"
+                value={form.jinisChara}
+                disabled={isBusy}
+                onChange={(value) =>
+                  setForm((c) => (c ? { ...c, jinisChara: value } : c))
+                }
+              />
+            }
           />
-          <SheetRow
+          <BalanceSheetRow
+            rightLabelTheme="main"
             rightLabel="CASH"
-            rightValue={formatCell(live.cash)}
+            rightValue={formatSheetCell(live.cash)}
           />
-          <SheetRow
+          <BalanceSheetRow
             isTotal
+            totalVariant="main"
             leftLabel="VAL1"
-            leftValue={formatCell(live.leftTotal)}
+            leftLabelTheme="main"
+            leftValue={formatSheetCell(live.leftTotal)}
             rightLabel="VAL2"
-            rightValue={formatCell(live.rightTotal)}
+            rightLabelTheme="main"
+            rightValue={formatSheetCell(live.rightTotal)}
           />
         </div>
 
         <p className="balance-sheet-hint text-muted-foreground">
-          <span className="font-medium text-foreground">LAPTOP</span> = sum of
-          active member credits ·{' '}
-          <span className="font-medium text-foreground">SUDH</span> = period
-          interest ·{' '}
-          <span className="font-medium text-foreground">CASH</span> = period
-          (ToBill + Asol + Interest − Dewa)
+          <span className="font-medium text-foreground">LAPTOP</span> = active
+          credits ·{' '}
+          <span className="font-medium text-foreground">SUDH</span> /{' '}
+          <span className="font-medium text-foreground">CASH</span> from period
+          calculation
         </p>
       </div>
-    </SectionCard>
+    </div>
   )
 }

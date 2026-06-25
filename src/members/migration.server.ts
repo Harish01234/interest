@@ -18,16 +18,21 @@ import type {
 } from '@/members/types'
 
 function buildMembersWhere(filters: {
+  slNo: string
   name: string
   fatherName: string
   type: GetMembersParams['type']
 }) {
+  const slNo = filters.slNo.trim()
   const name = filters.name.trim()
   const fatherName = filters.fatherName.trim()
 
   return {
     active: true,
     ...(filters.type !== 'all' ? { type: filters.type } : {}),
+    ...(slNo
+      ? { slNo: { contains: slNo, mode: 'insensitive' as const } }
+      : {}),
     ...(name
       ? { name: { contains: name, mode: 'insensitive' as const } }
       : {}),
@@ -42,8 +47,8 @@ export async function getMembersImpl(
 ): Promise<GetMembersResult> {
   await requireAuthSession()
 
-  const { page, pageSize, name, fatherName, credit, type } = data
-  const where = buildMembersWhere({ name, fatherName, type })
+  const { page, pageSize, slNo, name, fatherName, credit, type } = data
+  const where = buildMembersWhere({ slNo, name, fatherName, type })
   const creditQuery = credit.trim()
 
   let matching = await prisma.member.findMany({

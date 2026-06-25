@@ -11,6 +11,7 @@ export const creditSumQueryKey = ['members', 'credit-sum'] as const
 export const defaultMembersParams: GetMembersParams = {
   page: 1,
   pageSize: 10,
+  slNo: '',
   name: '',
   fatherName: '',
   credit: '',

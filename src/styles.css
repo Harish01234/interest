@@ -687,7 +687,7 @@ body {
 
   @media (min-width: 1024px) {
     .members-filter-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 
@@ -864,25 +864,151 @@ body {
     box-shadow: 0 0 0 2px oklch(from var(--chart-1) l c h / 0.15);
   }
 
-  .balance-sheet-row-total .balance-sheet-label {
-    color: oklch(from var(--chart-1) 0.42 c h);
+  .balance-sheet-label-main {
+    color: oklch(from var(--chart-3) 0.42 c h);
+    background: oklch(from var(--chart-3) l c h / 0.12);
+  }
+
+  .dark .balance-sheet-label-main {
+    color: oklch(from var(--chart-3) 0.88 c h);
+  }
+
+  .balance-sheet-label-period-left {
+    color: oklch(from var(--chart-5) 0.4 c h);
+    background: oklch(from var(--chart-5) l c h / 0.18);
+  }
+
+  .dark .balance-sheet-label-period-left {
+    color: oklch(from var(--chart-5) 0.88 c h);
+  }
+
+  .balance-sheet-label-period-right {
+    color: oklch(from var(--chart-1) 0.4 c h);
     background: oklch(from var(--chart-1) l c h / 0.14);
   }
 
-  .dark .balance-sheet-row-total .balance-sheet-label {
-    color: oklch(from var(--chart-1) 0.9 c h);
+  .dark .balance-sheet-label-period-right {
+    color: oklch(from var(--chart-1) 0.88 c h);
   }
 
-  .balance-sheet-row-total .balance-sheet-value {
-    background: oklch(from var(--chart-1) l c h / 0.08);
+  .balance-sheet-row-total-period .balance-sheet-label,
+  .balance-sheet-row-total-period .balance-sheet-value {
+    background: oklch(from var(--chart-2) l c h / 0.16);
   }
 
-  .balance-sheet-row-total .balance-sheet-number {
-    color: oklch(from var(--chart-1) 0.42 c h);
+  .balance-sheet-row-total-period .balance-sheet-number {
+    color: oklch(from var(--chart-2) 0.45 c h);
   }
 
-  .dark .balance-sheet-row-total .balance-sheet-number {
-    color: oklch(from var(--chart-1) 0.92 c h);
+  .dark .balance-sheet-row-total-period .balance-sheet-number {
+    color: oklch(from var(--chart-2) 0.92 c h);
+  }
+
+  .balance-sheet-row-total-main .balance-sheet-label,
+  .balance-sheet-row-total-main .balance-sheet-value {
+    background: oklch(from var(--chart-4) l c h / 0.22);
+  }
+
+  .balance-sheet-row-total-main .balance-sheet-number {
+    color: oklch(from var(--chart-4) 0.42 c h);
+  }
+
+  .dark .balance-sheet-row-total-main .balance-sheet-number {
+    color: oklch(from var(--chart-4) 0.9 c h);
+  }
+
+  .balance-sheet-cell-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .balance-sheet-cell-meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .balance-sheet-person-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .balance-sheet-person-name {
+    height: 1.75rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .calc-worksheet {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 1200px) {
+    .calc-worksheet {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: start;
+    }
+  }
+
+  .calc-worksheet-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg-strong);
+    box-shadow: var(--glass-inset);
+  }
+
+  .calc-worksheet-panel-error {
+    color: var(--destructive);
+    font-size: 0.875rem;
+  }
+
+  .calc-worksheet-panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .calc-worksheet-panel-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .calc-worksheet-panel-desc {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+  }
+
+  .calc-worksheet-recon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border-subtle);
+  }
+
+  .calc-worksheet-sheet-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
   .balance-sheet-hint {
