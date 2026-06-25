@@ -6,7 +6,6 @@ import {
   Pencil,
   Plus,
   RefreshCw,
-  Search,
   Trash2,
   Users,
 } from 'lucide-react'
@@ -15,6 +14,12 @@ import { toast } from 'sonner'
 import type { MemberType } from '@/lib/read-csv'
 import { MetricCard } from '@/components/patterns/metric-card'
 import { SectionCard } from '@/components/patterns/section-card'
+import {
+  MembersFilterPanel,
+  pageSizeOptions,
+  typeFilterOptions,
+  type TypeFilter,
+} from '@/components/members-filter-panel'
 import {
   createMember,
   deleteMember,
@@ -28,7 +33,6 @@ import {
   membersQueryKey,
   membersQueryOptions,
 } from '@/members/queries'
-import type { GetMembersParams } from '@/members/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,18 +89,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-
-const typeFilterOptions = [
-  { value: 'all', label: 'All types' },
-  { value: 'gold', label: 'Gold' },
-  { value: 'silver', label: 'Silver' },
-  { value: 'both', label: 'Both' },
-  { value: 'unknown', label: 'Unknown' },
-] as const
-
-const pageSizeOptions = [10, 20, 50] as const
-
-type TypeFilter = GetMembersParams['type']
 
 const typeBadgeClass: Record<MemberType, string> = {
   gold: 'badge-type-gold',
@@ -568,8 +560,14 @@ function MemberDetailDialog({
 
 export function MembersPanel() {
   const queryClient = useQueryClient()
-  const [search, setSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [nameFilter, setNameFilter] = useState('')
+  const [fatherNameFilter, setFatherNameFilter] = useState('')
+  const [creditFilter, setCreditFilter] = useState('')
+  const [debouncedFilters, setDebouncedFilters] = useState({
+    name: '',
+    fatherName: '',
+    credit: '',
+  })
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<(typeof pageSizeOptions)[number]>(10)
@@ -579,21 +577,27 @@ export function MembersPanel() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setDebouncedSearch(search)
+      setDebouncedFilters({
+        name: nameFilter,
+        fatherName: fatherNameFilter,
+        credit: creditFilter,
+      })
       setPage(1)
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [search])
+  }, [nameFilter, fatherNameFilter, creditFilter])
 
   const queryParams = useMemo(
     () => ({
       page,
       pageSize,
-      search: debouncedSearch,
+      name: debouncedFilters.name,
+      fatherName: debouncedFilters.fatherName,
+      credit: debouncedFilters.credit,
       type: typeFilter,
     }),
-    [page, pageSize, debouncedSearch, typeFilter],
+    [page, pageSize, debouncedFilters, typeFilter],
   )
 
   const { data, isLoading, isFetching, error, refetch } = useQuery(
@@ -636,6 +640,21 @@ export function MembersPanel() {
 
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1
   const rangeEnd = Math.min(page * pageSize, total)
+
+  const activeFilterCount = [
+    debouncedFilters.name.trim(),
+    debouncedFilters.fatherName.trim(),
+    debouncedFilters.credit.trim(),
+  ].filter(Boolean).length
+
+  const hasSearchFilters = activeFilterCount > 0
+  const hasAnyFilters = hasSearchFilters || typeFilter !== 'all'
+
+  const clearSearchFilters = () => {
+    setNameFilter('')
+    setFatherNameFilter('')
+    setCreditFilter('')
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -683,60 +702,36 @@ export function MembersPanel() {
         footerAlign="between"
         bodyClassName="space-y-4"
       >
-        <div className="data-toolbar">
-          <div className="search-field">
-            <Search className="search-field-icon" aria-hidden />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by name, phone, sl no, credit..."
-              className="search-field-input"
-              aria-label="Search members"
-            />
-          </div>
-
-          <Select
-            value={typeFilter}
-            onValueChange={(value) => {
-              setTypeFilter(value as TypeFilter)
-              setPage(1)
-            }}
-          >
-            <SelectTrigger className="toolbar-select toolbar-select-md">
-              <SelectValue placeholder="Filter by type" />
-            </SelectTrigger>
-            <SelectContent>
-              {typeFilterOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={String(pageSize)}
-            onValueChange={(value) => {
-              setPageSize(Number(value) as (typeof pageSizeOptions)[number])
-              setPage(1)
-            }}
-          >
-            <SelectTrigger className="toolbar-select toolbar-select-sm">
-              <SelectValue placeholder="Rows per page" />
-            </SelectTrigger>
-            <SelectContent>
-              {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size} per page
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <MembersFilterPanel
+          name={nameFilter}
+          fatherName={fatherNameFilter}
+          credit={creditFilter}
+          type={typeFilter}
+          pageSize={pageSize}
+          onNameChange={setNameFilter}
+          onFatherNameChange={setFatherNameFilter}
+          onCreditChange={setCreditFilter}
+          onTypeChange={(value) => {
+            setTypeFilter(value)
+            setPage(1)
+          }}
+          onPageSizeChange={(value) => {
+            setPageSize(value)
+            setPage(1)
+          }}
+          onClearFilters={clearSearchFilters}
+        />
 
         <div className="meta-bar">
           <span className="text-muted-foreground">
             Showing {rangeStart}–{rangeEnd} of {total} members
+            {activeFilterCount > 0 ? (
+              <span className="text-foreground/80">
+                {' '}
+                · {activeFilterCount} filter{activeFilterCount === 1 ? '' : 's'}{' '}
+                applied
+              </span>
+            ) : null}
           </span>
           <div className="flex flex-wrap items-center gap-3">
             <span className="meta-stat">
@@ -786,14 +781,14 @@ export function MembersPanel() {
                 <Users />
               </EmptyMedia>
               <EmptyTitle>
-                {total === 0 && !debouncedSearch && typeFilter === 'all'
+                {total === 0 && !hasAnyFilters
                   ? 'No members yet'
                   : 'No matches found'}
               </EmptyTitle>
               <EmptyDescription>
-                {total === 0 && !debouncedSearch && typeFilter === 'all'
+                {total === 0 && !hasAnyFilters
                   ? 'Import a CSV file or add a member manually to get started.'
-                  : 'Try a different search term or type filter.'}
+                  : 'Try different name, father\'s name, or credit filters.'}
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

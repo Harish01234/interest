@@ -16,23 +16,26 @@ import type {
   SumAllCreditsResult,
 } from '@/members/types'
 
-function buildMembersWhere(search: string, type: GetMembersParams['type']) {
-  const query = search.trim()
+function buildMembersWhere(filters: {
+  name: string
+  fatherName: string
+  credit: string
+  type: GetMembersParams['type']
+}) {
+  const name = filters.name.trim()
+  const fatherName = filters.fatherName.trim()
+  const credit = filters.credit.trim()
 
   return {
-    ...(type !== 'all' ? { type } : {}),
-    ...(query
-      ? {
-          OR: [
-            { slNo: { contains: query, mode: 'insensitive' as const } },
-            { name: { contains: query, mode: 'insensitive' as const } },
-            { fatherName: { contains: query, mode: 'insensitive' as const } },
-            { phoneNo: { contains: query, mode: 'insensitive' as const } },
-            { credit: { contains: query, mode: 'insensitive' as const } },
-            { date: { contains: query, mode: 'insensitive' as const } },
-            { jinsis: { contains: query, mode: 'insensitive' as const } },
-          ],
-        }
+    ...(filters.type !== 'all' ? { type: filters.type } : {}),
+    ...(name
+      ? { name: { contains: name, mode: 'insensitive' as const } }
+      : {}),
+    ...(fatherName
+      ? { fatherName: { contains: fatherName, mode: 'insensitive' as const } }
+      : {}),
+    ...(credit
+      ? { credit: { contains: credit, mode: 'insensitive' as const } }
       : {}),
   }
 }
@@ -42,8 +45,8 @@ export async function getMembersImpl(
 ): Promise<GetMembersResult> {
   await requireAuthSession()
 
-  const { page, pageSize, search, type } = data
-  const where = buildMembersWhere(search, type)
+  const { page, pageSize, name, fatherName, credit, type } = data
+  const where = buildMembersWhere({ name, fatherName, credit, type })
 
   const matching = await prisma.member.findMany({
     where,

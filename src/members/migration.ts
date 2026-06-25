@@ -28,7 +28,9 @@ const migrateMembersInputSchema = z.object({
 const getMembersInputSchema = z.object({
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(50).default(10),
-  search: z.string().default(''),
+  name: z.string().default(''),
+  fatherName: z.string().default(''),
+  credit: z.string().default(''),
   type: z.enum(['all', 'gold', 'silver', 'both', 'unknown']).default('all'),
 })
 
