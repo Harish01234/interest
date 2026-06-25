@@ -113,9 +113,9 @@ model Member {
 model Calculation {
   id              Int       @id @default(autoincrement())
   TotalTobill     Int       @default(0)
-  Asol            Int       @default(0) // sum(credit) of members settled after periodStartedAt
-  Interest        Int       @default(0) // sum(interest) of members settled after periodStartedAt
-  Dewa            Int       @default(0) // sum(credit) of members added after periodStartedAt
+  Asol            Int       @default(0) // manual base; + settled members credit in period
+  Interest        Int       @default(0) // manual base; + settled members interest in period
+  Dewa            Int       @default(0) // manual base; + added members credit in period
 
   CashInHome      Int       @default(0)
   CashInShop      Int       @default(0)

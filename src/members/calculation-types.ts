@@ -15,6 +15,9 @@ export type CalculationMemberRow = {
 
 export type SaveCalculationInput = {
   totalToBill: number
+  manualAsol: number
+  manualInterest: number
+  manualDewa: number
   cashInHome: number
   cashInShop: number
   cashToPersons: CashToPerson[]
@@ -29,21 +32,35 @@ export type CalculationDto = {
   cashInShop: number
   cashToPersons: CashToPerson[]
 
+  /** User-entered base for Asol */
+  manualAsol: number
+  /** User-entered base for Interest */
+  manualInterest: number
+  /** User-entered base for Dewa */
+  manualDewa: number
+
   // period anchor
   periodStartedAt: Date | null
 
-  // derived (period-scoped)
+  /** From settled members this period */
+  memberAsol: number
+  /** From settled members this period */
+  memberInterest: number
+  /** From added members this period */
+  memberDewa: number
+
+  /** manual + member totals */
   asol: number
   interest: number
   dewa: number
 
   // member breakdown behind the derived numbers
-  settledMembers: CalculationMemberRow[] // Asol + Interest source
-  addedMembers: CalculationMemberRow[] // Dewa source
+  settledMembers: CalculationMemberRow[]
+  addedMembers: CalculationMemberRow[]
 
   // reconciliation
-  leftTotal: number // totalToBill + asol + interest - dewa
-  rightTotal: number // cashInHome + cashInShop + sum(cashToPersons)
-  difference: number // leftTotal - rightTotal
+  leftTotal: number
+  rightTotal: number
+  difference: number
   isBalanced: boolean
 }

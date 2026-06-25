@@ -20,6 +20,9 @@ const cashToPersonSchema = z.object({
 
 const saveCalculationInputSchema = z.object({
   totalToBill: z.number().int().min(0).default(0),
+  manualAsol: z.number().int().min(0).default(0),
+  manualInterest: z.number().int().min(0).default(0),
+  manualDewa: z.number().int().min(0).default(0),
   cashInHome: z.number().int().min(0).default(0),
   cashInShop: z.number().int().min(0).default(0),
   cashToPersons: z.array(cashToPersonSchema).default([]),

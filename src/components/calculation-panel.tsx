@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { MetricCard } from '@/components/patterns/metric-card'
 import { SectionCard } from '@/components/patterns/section-card'
 import {
   saveCalculation,
@@ -64,6 +63,9 @@ type CashPersonRow = { name: string; amount: string }
 
 type FormState = {
   totalToBill: string
+  manualAsol: string
+  manualInterest: string
+  manualDewa: string
   cashInHome: string
   cashInShop: string
   cashToPersons: CashPersonRow[]
@@ -72,6 +74,9 @@ type FormState = {
 function dtoToForm(dto: CalculationDto): FormState {
   return {
     totalToBill: String(dto.totalToBill ?? 0),
+    manualAsol: String(dto.manualAsol ?? 0),
+    manualInterest: String(dto.manualInterest ?? 0),
+    manualDewa: String(dto.manualDewa ?? 0),
     cashInHome: String(dto.cashInHome ?? 0),
     cashInShop: String(dto.cashInShop ?? 0),
     cashToPersons: dto.cashToPersons.map((entry) => ({
@@ -79,6 +84,64 @@ function dtoToForm(dto: CalculationDto): FormState {
       amount: String(entry.amount),
     })),
   }
+}
+
+type PeriodTotalCardProps = {
+  label: string
+  variant: 'chart1' | 'chart2' | 'chart3'
+  manualId: string
+  manualValue: string
+  memberValue: number
+  totalValue: number
+  memberHint: string
+  disabled: boolean
+  onManualChange: (value: string) => void
+}
+
+function PeriodTotalCard({
+  label,
+  variant,
+  manualId,
+  manualValue,
+  memberValue,
+  totalValue,
+  memberHint,
+  disabled,
+  onManualChange,
+}: PeriodTotalCardProps) {
+  return (
+    <div className={cn('calc-period-card', `calc-period-card-${variant}`)}>
+      <div className="calc-period-card-header">
+        <p className="calc-period-card-label">{label}</p>
+        <p className="calc-period-card-total">{formatMoney(totalValue)}</p>
+      </div>
+      <div className="calc-period-card-body">
+        <div className="space-y-1.5">
+          <Label htmlFor={manualId} className="text-xs text-muted-foreground">
+            Manual amount
+          </Label>
+          <Input
+            id={manualId}
+            type="number"
+            inputMode="numeric"
+            min={0}
+            className="calc-period-input"
+            value={manualValue}
+            disabled={disabled}
+            onChange={(event) => onManualChange(event.target.value)}
+          />
+        </div>
+        <div className="calc-period-member-line">
+          <span className="calc-period-plus">+</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground">From members</p>
+            <p className="font-semibold tabular-nums">{formatMoney(memberValue)}</p>
+            <p className="text-xs text-muted-foreground">{memberHint}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function MemberBreakdownTable({
@@ -172,6 +235,9 @@ export function CalculationPanel() {
       return saveCalculation({
         data: {
           totalToBill: parseAmount(form.totalToBill),
+          manualAsol: parseAmount(form.manualAsol),
+          manualInterest: parseAmount(form.manualInterest),
+          manualDewa: parseAmount(form.manualDewa),
           cashInHome: parseAmount(form.cashInHome),
           cashInShop: parseAmount(form.cashInShop),
           cashToPersons: form.cashToPersons
@@ -214,9 +280,16 @@ export function CalculationPanel() {
 
   // Live reconciliation from the current inputs + server-derived sums.
   const live = useMemo(() => {
-    const asol = data?.asol ?? 0
-    const interest = data?.interest ?? 0
-    const dewa = data?.dewa ?? 0
+    const manualAsol = form ? parseAmount(form.manualAsol) : 0
+    const manualInterest = form ? parseAmount(form.manualInterest) : 0
+    const manualDewa = form ? parseAmount(form.manualDewa) : 0
+    const memberAsol = data?.memberAsol ?? 0
+    const memberInterest = data?.memberInterest ?? 0
+    const memberDewa = data?.memberDewa ?? 0
+
+    const asol = manualAsol + memberAsol
+    const interest = manualInterest + memberInterest
+    const dewa = manualDewa + memberDewa
 
     const totalToBill = form ? parseAmount(form.totalToBill) : 0
     const cashInHome = form ? parseAmount(form.cashInHome) : 0
@@ -230,6 +303,12 @@ export function CalculationPanel() {
     const difference = leftTotal - rightTotal
 
     return {
+      manualAsol,
+      manualInterest,
+      manualDewa,
+      memberAsol,
+      memberInterest,
+      memberDewa,
       asol,
       interest,
       dewa,
@@ -331,37 +410,66 @@ export function CalculationPanel() {
         </Badge>
       </div>
 
-      {/* Derived metrics */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <MetricCard
-          variant="chart1"
-          label="Asol (settled principal)"
-          value={formatMoney(live.asol)}
-          hint={`${data?.settledMembers.length ?? 0} settled this period`}
-        />
-        <MetricCard
-          variant="chart2"
-          label="Interest (this period)"
-          value={formatMoney(live.interest)}
-          hint="From settled members"
-        />
-        <MetricCard
-          variant="chart3"
-          label="Dewa (new loans)"
-          value={formatMoney(live.dewa)}
-          hint={`${data?.addedMembers.length ?? 0} added this period`}
-        />
-      </div>
+      {/* Period totals — manual + members */}
+      <SectionCard
+        icon={Coins}
+        iconVariant="primary"
+        title="Period totals (left side)"
+        description="Enter manual base amounts for Asol, Interest and Dewa. Settling or adding members in this period adds on top automatically."
+        bodyClassName="space-y-4"
+      >
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          <PeriodTotalCard
+            label="Asol"
+            variant="chart1"
+            manualId="calc-manual-asol"
+            manualValue={form.manualAsol}
+            memberValue={live.memberAsol}
+            totalValue={live.asol}
+            memberHint={`${data?.settledMembers.length ?? 0} settled this period`}
+            disabled={isBusy}
+            onManualChange={(value) =>
+              setForm((c) => (c ? { ...c, manualAsol: value } : c))
+            }
+          />
+          <PeriodTotalCard
+            label="Interest"
+            variant="chart2"
+            manualId="calc-manual-interest"
+            manualValue={form.manualInterest}
+            memberValue={live.memberInterest}
+            totalValue={live.interest}
+            memberHint="From settled members"
+            disabled={isBusy}
+            onManualChange={(value) =>
+              setForm((c) => (c ? { ...c, manualInterest: value } : c))
+            }
+          />
+          <PeriodTotalCard
+            label="Dewa"
+            variant="chart3"
+            manualId="calc-manual-dewa"
+            manualValue={form.manualDewa}
+            memberValue={live.memberDewa}
+            totalValue={live.dewa}
+            memberHint={`${data?.addedMembers.length ?? 0} added this period`}
+            disabled={isBusy}
+            onManualChange={(value) =>
+              setForm((c) => (c ? { ...c, manualDewa: value } : c))
+            }
+          />
+        </div>
+      </SectionCard>
 
       {/* Manual inputs */}
       <SectionCard
         icon={Wallet}
         iconVariant="primary"
-        title="Period inputs"
+        title="Cash & period start"
         description={
           periodStarted
-            ? 'Enter the cash positions. Asol, Interest and Dewa are calculated automatically from members changed after the period started.'
-            : 'Enter Total to bill to start this period. Settlements and new members after that point will feed Asol, Interest and Dewa.'
+            ? 'Enter cash positions on the right side. Save to persist manual totals and cash values.'
+            : 'Enter Total to bill to start this period. Settlements and new members after that point feed Asol, Interest and Dewa.'
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -559,9 +667,8 @@ export function CalculationPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Start a new period?</AlertDialogTitle>
             <AlertDialogDescription>
-              This clears Total to bill and all cash inputs, and resets the period
-              start. Asol, Interest and Dewa will count from now on. Member records
-              are not changed.
+              This clears Total to bill, manual Asol/Interest/Dewa, and all cash
+              inputs, and resets the period start. Member records are not changed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

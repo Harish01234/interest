@@ -61,19 +61,24 @@ const memberRowSelect = {
 } as const
 
 /**
- * Builds the period-scoped calculation. Asol/Interest come from members
- * settled after the period start; Dewa from members added after the period
- * start. The single calculation row holds the manual inputs + last snapshot.
+ * Builds the period calculation. Manual Asol/Interest/Dewa from the row are
+ * combined with member-derived sums for the period.
  */
 async function buildCalculationDto(row: {
   id: number
   TotalTobill: number
+  Asol: number
+  Interest: number
+  Dewa: number
   CashInHome: number
   CashInShop: number
   cashToPersons: unknown
   periodStartedAt: Date | null
 } | null): Promise<CalculationDto> {
   const totalToBill = row?.TotalTobill ?? 0
+  const manualAsol = row?.Asol ?? 0
+  const manualInterest = row?.Interest ?? 0
+  const manualDewa = row?.Dewa ?? 0
   const cashInHome = row?.CashInHome ?? 0
   const cashInShop = row?.CashInShop ?? 0
   const cashToPersons = parseCashToPersons(row?.cashToPersons)
@@ -98,9 +103,13 @@ async function buildCalculationDto(row: {
     addedMembers = added.map(toRow).sort(compareMembersBySlNo)
   }
 
-  const asol = settledMembers.reduce((sum, m) => sum + m.credit, 0)
-  const interest = settledMembers.reduce((sum, m) => sum + m.interest, 0)
-  const dewa = addedMembers.reduce((sum, m) => sum + m.credit, 0)
+  const memberAsol = settledMembers.reduce((sum, m) => sum + m.credit, 0)
+  const memberInterest = settledMembers.reduce((sum, m) => sum + m.interest, 0)
+  const memberDewa = addedMembers.reduce((sum, m) => sum + m.credit, 0)
+
+  const asol = manualAsol + memberAsol
+  const interest = manualInterest + memberInterest
+  const dewa = manualDewa + memberDewa
 
   const cashToPersonsTotal = cashToPersons.reduce(
     (sum, entry) => sum + entry.amount,
@@ -117,7 +126,13 @@ async function buildCalculationDto(row: {
     cashInHome,
     cashInShop,
     cashToPersons,
+    manualAsol,
+    manualInterest,
+    manualDewa,
     periodStartedAt,
+    memberAsol,
+    memberInterest,
+    memberDewa,
     asol,
     interest,
     dewa,
@@ -152,13 +167,14 @@ export async function saveCalculationImpl(
 
   const existing = await getCalculationRow()
 
-  // Stamp the period start the first time TotalTobill is set, or restart the
-  // period if it was previously empty.
   const shouldStartPeriod =
     !existing?.periodStartedAt && data.totalToBill > 0
 
   const baseData = {
     TotalTobill: Math.trunc(data.totalToBill),
+    Asol: Math.trunc(data.manualAsol),
+    Interest: Math.trunc(data.manualInterest),
+    Dewa: Math.trunc(data.manualDewa),
     CashInHome: Math.trunc(data.cashInHome),
     CashInShop: Math.trunc(data.cashInShop),
     cashToPersons,
@@ -182,15 +198,7 @@ export async function saveCalculationImpl(
     })
   }
 
-  const dto = await buildCalculationDto(row)
-
-  // Persist the derived snapshot so the stored row stays consistent.
-  await prisma.calculation.update({
-    where: { id: row.id },
-    data: { Asol: dto.asol, Interest: dto.interest, Dewa: dto.dewa },
-  })
-
-  return dto
+  return buildCalculationDto(row)
 }
 
 export async function startNewPeriodImpl(): Promise<CalculationDto> {
