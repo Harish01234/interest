@@ -18,14 +18,14 @@ import type {
 } from '@/members/types'
 
 function buildMembersWhere(filters: {
-  slNo: string
-  name: string
-  fatherName: string
+  slNo?: string
+  name?: string
+  fatherName?: string
   type: GetMembersParams['type']
 }) {
-  const slNo = filters.slNo.trim()
-  const name = filters.name.trim()
-  const fatherName = filters.fatherName.trim()
+  const slNo = (filters.slNo ?? '').trim()
+  const name = (filters.name ?? '').trim()
+  const fatherName = (filters.fatherName ?? '').trim()
 
   return {
     active: true,
@@ -49,7 +49,7 @@ export async function getMembersImpl(
 
   const { page, pageSize, slNo, name, fatherName, credit, type } = data
   const where = buildMembersWhere({ slNo, name, fatherName, type })
-  const creditQuery = credit.trim()
+  const creditQuery = (credit ?? '').trim()
 
   let matching = await prisma.member.findMany({
     where,
