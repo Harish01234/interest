@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, LayoutGrid, Save, XCircle } from 'lucide-react'
+import { CheckCircle2, LayoutGrid, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { SectionCard } from '@/components/patterns/section-card'
@@ -11,7 +11,7 @@ import {
 import { mainCalculationQueryOptions } from '@/members/main-calculation-queries'
 import { calculationQueryOptions } from '@/members/calculation-queries'
 import { creditSumQueryOptions } from '@/members/queries'
-import { Button } from '@/components/ui/button'
+import { SectionSaveButton } from '@/components/section-save-button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
@@ -196,21 +196,12 @@ export function MainCalculationSheet() {
       title="Main calculation"
       description="Overall balance: TOBIL + SUDH (interest) must equal Laptop + Jinish chara + Cash. Laptop, SUDH, and Cash update automatically from members and the period calculation."
       actions={
-        <Button
-          type="button"
-          size="sm"
-          className="btn-primary-glow"
+        <SectionSaveButton
+          label="Save main"
+          pending={saveMutation.isPending}
           disabled={isBusy}
-          aria-busy={saveMutation.isPending}
           onClick={() => saveMutation.mutate()}
-        >
-          {saveMutation.isPending ? (
-            <Spinner className="size-4" />
-          ) : (
-            <Save className="size-4" />
-          )}
-          Save
-        </Button>
+        />
       }
       bodyClassName="space-y-4"
     >

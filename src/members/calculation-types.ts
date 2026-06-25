@@ -23,6 +23,19 @@ export type SaveCalculationInput = {
   cashToPersons: CashToPerson[]
 }
 
+export type SavePeriodTotalsInput = {
+  manualAsol: number
+  manualInterest: number
+  manualDewa: number
+}
+
+export type SaveCashPeriodInput = {
+  totalToBill: number
+  cashInHome: number
+  cashInShop: number
+  cashToPersons: CashToPerson[]
+}
+
 export type CalculationDto = {
   id: number | null
 

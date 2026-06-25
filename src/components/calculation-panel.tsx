@@ -6,8 +6,6 @@ import {
   CheckCircle2,
   Coins,
   Plus,
-  RotateCcw,
-  Save,
   Trash2,
   Wallet,
   XCircle,
@@ -16,23 +14,14 @@ import { toast } from 'sonner'
 
 import { SectionCard } from '@/components/patterns/section-card'
 import {
-  saveCalculation,
-  startNewPeriod,
+  saveCashPeriod,
+  savePeriodTotals,
   type CalculationDto,
   type CalculationMemberRow,
 } from '@/members/calculation'
 import { calculationQueryOptions } from '@/members/calculation-queries'
 import { mainCalculationQueryKey } from '@/members/main-calculation-queries'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { SectionSaveButton } from '@/components/section-save-button'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -218,7 +207,6 @@ export function CalculationPanel() {
   const { data, isLoading, error } = useQuery(calculationQueryOptions)
 
   const [form, setForm] = useState<FormState | null>(null)
-  const [resetOpen, setResetOpen] = useState(false)
 
   useEffect(() => {
     if (data) {
@@ -226,18 +214,42 @@ export function CalculationPanel() {
     }
   }, [data])
 
-  const saveMutation = useMutation({
+  const saveTotalsMutation = useMutation({
     mutationFn: () => {
       if (!form) {
         throw new Error('Form is not ready.')
       }
 
-      return saveCalculation({
+      return savePeriodTotals({
         data: {
-          totalToBill: parseAmount(form.totalToBill),
           manualAsol: parseAmount(form.manualAsol),
           manualInterest: parseAmount(form.manualInterest),
           manualDewa: parseAmount(form.manualDewa),
+        },
+      })
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData(calculationQueryOptions.queryKey, result)
+      queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
+      setForm(dtoToForm(result))
+      toast.success('Period totals saved')
+    },
+    onError: (saveError) => {
+      toast.error(
+        saveError instanceof Error ? saveError.message : 'Failed to save totals',
+      )
+    },
+  })
+
+  const saveCashMutation = useMutation({
+    mutationFn: () => {
+      if (!form) {
+        throw new Error('Form is not ready.')
+      }
+
+      return saveCashPeriod({
+        data: {
+          totalToBill: parseAmount(form.totalToBill),
           cashInHome: parseAmount(form.cashInHome),
           cashInShop: parseAmount(form.cashInShop),
           cashToPersons: form.cashToPersons
@@ -253,27 +265,11 @@ export function CalculationPanel() {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
       queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
-      toast.success('Calculation saved')
+      toast.success('Cash & period saved')
     },
     onError: (saveError) => {
       toast.error(
-        saveError instanceof Error ? saveError.message : 'Failed to save',
-      )
-    },
-  })
-
-  const resetMutation = useMutation({
-    mutationFn: () => startNewPeriod(),
-    onSuccess: (result) => {
-      queryClient.setQueryData(calculationQueryOptions.queryKey, result)
-      queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
-      setForm(dtoToForm(result))
-      setResetOpen(false)
-      toast.success('New period started')
-    },
-    onError: (resetError) => {
-      toast.error(
-        resetError instanceof Error ? resetError.message : 'Failed to reset',
+        saveError instanceof Error ? saveError.message : 'Failed to save cash',
       )
     },
   })
@@ -341,7 +337,7 @@ export function CalculationPanel() {
   }
 
   const periodStarted = data?.periodStartedAt != null
-  const isBusy = saveMutation.isPending || resetMutation.isPending
+  const isBusy = saveTotalsMutation.isPending || saveCashMutation.isPending
 
   const updatePerson = (index: number, patch: Partial<CashPersonRow>) =>
     setForm((current) =>
@@ -416,6 +412,14 @@ export function CalculationPanel() {
         iconVariant="primary"
         title="Period totals (left side)"
         description="Enter manual base amounts for Asol, Interest and Dewa. Settling or adding members in this period adds on top automatically."
+        actions={
+          <SectionSaveButton
+            label="Save totals"
+            pending={saveTotalsMutation.isPending}
+            disabled={isBusy}
+            onClick={() => saveTotalsMutation.mutate()}
+          />
+        }
         bodyClassName="space-y-4"
       >
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -468,37 +472,16 @@ export function CalculationPanel() {
         title="Cash & period start"
         description={
           periodStarted
-            ? 'Enter cash positions on the right side. Save to persist manual totals and cash values.'
+            ? 'Enter Total to bill and cash on the right side. Save this section separately from period totals above.'
             : 'Enter Total to bill to start this period. Settlements and new members after that point feed Asol, Interest and Dewa.'
         }
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isBusy || !periodStarted}
-              onClick={() => setResetOpen(true)}
-            >
-              <RotateCcw className="size-4" />
-              New period
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="btn-primary-glow"
-              disabled={isBusy}
-              aria-busy={saveMutation.isPending}
-              onClick={() => saveMutation.mutate()}
-            >
-              {saveMutation.isPending ? (
-                <Spinner className="size-4" />
-              ) : (
-                <Save className="size-4" />
-              )}
-              Save
-            </Button>
-          </div>
+          <SectionSaveButton
+            label="Save cash"
+            pending={saveCashMutation.isPending}
+            disabled={isBusy}
+            onClick={() => saveCashMutation.mutate()}
+          />
         }
         bodyClassName="space-y-5"
       >
@@ -661,33 +644,6 @@ export function CalculationPanel() {
           }
         />
       </SectionCard>
-
-      <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Start a new period?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This clears Total to bill, manual Asol/Interest/Dewa, and all cash
-              inputs, and resets the period start. Member records are not changed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={resetMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={resetMutation.isPending}
-              onClick={(event) => {
-                event.preventDefault()
-                resetMutation.mutate()
-              }}
-            >
-              {resetMutation.isPending ? <Spinner className="size-4" /> : null}
-              Start new period
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

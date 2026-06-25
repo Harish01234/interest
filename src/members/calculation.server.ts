@@ -7,7 +7,10 @@ import type {
   CalculationMemberRow,
   CashToPerson,
   SaveCalculationInput,
+  SaveCashPeriodInput,
+  SavePeriodTotalsInput,
 } from '@/members/calculation-types'
+import type { MainCalculationDto } from '@/members/main-calculation-types'
 
 function parseCashToPersons(value: unknown): CashToPerson[] {
   if (!Array.isArray(value)) {
@@ -199,6 +202,62 @@ export async function saveCalculationImpl(
   }
 
   return buildCalculationDto(row)
+}
+
+export async function savePeriodTotalsImpl(
+  data: SavePeriodTotalsInput,
+): Promise<CalculationDto> {
+  await requireAuthSession()
+
+  const existing = await getCalculationRow()
+  const cashToPersons = parseCashToPersons(existing?.cashToPersons)
+
+  return saveCalculationImpl({
+    totalToBill: existing?.TotalTobill ?? 0,
+    manualAsol: Math.trunc(data.manualAsol),
+    manualInterest: Math.trunc(data.manualInterest),
+    manualDewa: Math.trunc(data.manualDewa),
+    cashInHome: existing?.CashInHome ?? 0,
+    cashInShop: existing?.CashInShop ?? 0,
+    cashToPersons,
+  })
+}
+
+export async function saveCashPeriodImpl(
+  data: SaveCashPeriodInput,
+): Promise<CalculationDto> {
+  await requireAuthSession()
+
+  const existing = await getCalculationRow()
+  const cashToPersons = data.cashToPersons.map((entry) => ({
+    name: entry.name.trim(),
+    amount: Math.trunc(entry.amount),
+  }))
+
+  return saveCalculationImpl({
+    totalToBill: Math.trunc(data.totalToBill),
+    manualAsol: existing?.Asol ?? 0,
+    manualInterest: existing?.Interest ?? 0,
+    manualDewa: existing?.Dewa ?? 0,
+    cashInHome: Math.trunc(data.cashInHome),
+    cashInShop: Math.trunc(data.cashInShop),
+    cashToPersons,
+  })
+}
+
+export async function resetAllCalculationsImpl(): Promise<{
+  calculation: CalculationDto
+  mainCalculation: MainCalculationDto
+}> {
+  await requireAuthSession()
+
+  const calculation = await startNewPeriodImpl()
+  const { resetMainCalculationImpl } = await import(
+    '@/members/main-calculation.server'
+  )
+  const mainCalculation = await resetMainCalculationImpl()
+
+  return { calculation, mainCalculation }
 }
 
 export async function startNewPeriodImpl(): Promise<CalculationDto> {

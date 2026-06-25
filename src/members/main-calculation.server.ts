@@ -100,3 +100,34 @@ export async function saveMainCalculationImpl(
     credits.total,
   )
 }
+
+export async function resetMainCalculationImpl(): Promise<MainCalculationDto> {
+  await requireAuthSession()
+
+  const existing = await getMainCalculationRow()
+
+  const row = existing
+    ? await prisma.mainCalculation.update({
+        where: { id: existing.id },
+        data: {
+          TotalTobill: 0,
+          Bandak: 0,
+          jinisChara: 0,
+          interest: 0,
+          cash: 0,
+        },
+      })
+    : await prisma.mainCalculation.create({ data: {} })
+
+  const [period, credits] = await Promise.all([
+    getCalculationImpl(),
+    sumAllCreditsImpl(),
+  ])
+
+  return buildMainCalculationDto(
+    row,
+    period.interest,
+    period.leftTotal,
+    credits.total,
+  )
+}
