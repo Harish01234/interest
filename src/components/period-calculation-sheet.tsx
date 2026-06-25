@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckCircle2, Plus, Trash2, XCircle } from 'lucide-react'
+import { Calculator, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
   BalanceSheetRow,
+  BalanceSheetScroll,
   formatSheetCell,
   ManualTotalCell,
   parseSheetAmount,
-  PersonSheetInput,
+  SheetLabelInput,
   SheetNumberInput,
+  WorksheetPanel,
 } from '@/components/balance-sheet'
 import { SectionSaveButton } from '@/components/section-save-button'
 import { Button } from '@/components/ui/button'
@@ -21,7 +23,6 @@ import {
 } from '@/members/calculation'
 import { calculationQueryOptions } from '@/members/calculation-queries'
 import { mainCalculationQueryKey } from '@/members/main-calculation-queries'
-import { cn } from '@/lib/utils'
 
 type CashPersonRow = { name: string; amount: string }
 
@@ -140,7 +141,6 @@ export function PeriodCalculationSheet() {
     const subtotal = totalToBill + asol + interest
     const leftTotal = subtotal - dewa
     const rightTotal = cashInHome + cashInShop + cashToPersonsTotal
-    const difference = leftTotal - rightTotal
 
     return {
       memberAsol,
@@ -152,14 +152,14 @@ export function PeriodCalculationSheet() {
       subtotal,
       leftTotal,
       rightTotal,
-      difference,
-      isBalanced: difference === 0,
+      difference: leftTotal - rightTotal,
+      isBalanced: leftTotal === rightTotal,
     }
   }, [data, form])
 
   if (isLoading || !form) {
     return (
-      <div className="calc-worksheet-panel loading-panel" role="status">
+      <div className="calc-worksheet-panel loading-panel min-h-48" role="status">
         <Spinner className="size-6 text-primary" />
       </div>
     )
@@ -167,7 +167,7 @@ export function PeriodCalculationSheet() {
 
   if (error) {
     return (
-      <div className="calc-worksheet-panel calc-worksheet-panel-error">
+      <div className="calc-worksheet-panel calc-worksheet-panel-error min-h-48 p-6">
         {error instanceof Error ? error.message : 'Could not load calculation.'}
       </div>
     )
@@ -209,37 +209,38 @@ export function PeriodCalculationSheet() {
         : current,
     )
 
-  const personRightCell = (index: number) => {
-    const row = getPersonRow(index)
+  const personLabelInput = (index: number, fallback: string) => (
+    <SheetLabelInput
+      id={`calc-person-name-${index}`}
+      value={getPersonRow(index).name}
+      placeholder={fallback}
+      theme="period-right"
+      disabled={isBusy}
+      onChange={(value) => updatePerson(index, { name: value })}
+    />
+  )
 
-    return (
-      <PersonSheetInput
-        nameId={`calc-person-name-${index}`}
-        amountId={`calc-person-amount-${index}`}
-        name={row.name}
-        amount={row.amount}
-        disabled={isBusy}
-        onNameChange={(value) => updatePerson(index, { name: value })}
-        onAmountChange={(value) => updatePerson(index, { amount: value })}
-      />
-    )
-  }
-
-  const personLabel = (index: number, fallback: string) =>
-    getPersonRow(index).name.trim() || fallback
+  const personAmountInput = (index: number) => (
+    <SheetNumberInput
+      id={`calc-person-amount-${index}`}
+      value={getPersonRow(index).amount}
+      disabled={isBusy}
+      onChange={(value) => updatePerson(index, { amount: value })}
+    />
+  )
 
   const extraPersonRows = form.cashToPersons.slice(3)
 
   return (
-    <div className="calc-worksheet-panel">
-      <div className="calc-worksheet-panel-header">
-        <div>
-          <h3 className="calc-worksheet-panel-title">Calculation</h3>
-          <p className="calc-worksheet-panel-desc">
-            ToBill + Asol + Interest − Dewa = Cash
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <WorksheetPanel
+      variant="period"
+      icon={Calculator}
+      title="Calculation"
+      formula="ToBill + Asol + Interest − Dewa = Cash"
+      isBalanced={live.isBalanced}
+      difference={live.difference}
+      actions={
+        <>
           <SectionSaveButton
             label="Save totals"
             pending={saveTotalsMutation.isPending}
@@ -252,174 +253,10 @@ export function PeriodCalculationSheet() {
             disabled={isBusy}
             onClick={() => saveCashMutation.mutate()}
           />
-        </div>
-      </div>
-
-      <div
-        className={cn(
-          'calc-worksheet-recon',
-          live.isBalanced ? 'recon-banner-ok' : 'recon-banner-bad',
-        )}
-        role="status"
-      >
-        {live.isBalanced ? (
-          <CheckCircle2 className="size-4 shrink-0" aria-hidden />
-        ) : (
-          <XCircle className="size-4 shrink-0" aria-hidden />
-        )}
-        <span className="text-xs font-semibold">
-          {live.isBalanced
-            ? 'Balanced'
-            : `Off by ${formatSheetCell(Math.abs(live.difference))}`}
-        </span>
-      </div>
-
-      <div className="balance-sheet-wrap">
-        <div
-          className="balance-sheet-grid balance-sheet-grid-period"
-          role="table"
-          aria-label="Period calculation"
-        >
-          <BalanceSheetRow
-            leftLabel="TOBILL"
-            leftLabelTheme="period-left"
-            rightLabelTheme="period-right"
-            leftInput={
-              <SheetNumberInput
-                id="calc-tobill"
-                value={form.totalToBill}
-                disabled={isBusy}
-                onChange={(value) =>
-                  setForm((c) => (c ? { ...c, totalToBill: value } : c))
-                }
-              />
-            }
-            rightLabel="HOME"
-            rightInput={
-              <SheetNumberInput
-                id="calc-home"
-                value={form.cashInHome}
-                disabled={isBusy}
-                onChange={(value) =>
-                  setForm((c) => (c ? { ...c, cashInHome: value } : c))
-                }
-              />
-            }
-          />
-          <BalanceSheetRow
-            leftLabel="ASOL"
-            leftLabelTheme="period-left"
-            rightLabelTheme="period-right"
-            leftInput={
-              <ManualTotalCell
-                id="calc-asol"
-                manualValue={form.manualAsol}
-                memberValue={live.memberAsol}
-                totalValue={live.asol}
-                disabled={isBusy}
-                onManualChange={(value) =>
-                  setForm((c) => (c ? { ...c, manualAsol: value } : c))
-                }
-              />
-            }
-            rightLabel="DOKAN"
-            rightInput={
-              <SheetNumberInput
-                id="calc-shop"
-                value={form.cashInShop}
-                disabled={isBusy}
-                onChange={(value) =>
-                  setForm((c) => (c ? { ...c, cashInShop: value } : c))
-                }
-              />
-            }
-          />
-          <BalanceSheetRow
-            leftLabel="SUDH"
-            leftLabelTheme="period-left"
-            rightLabelTheme="period-right"
-            leftInput={
-              <ManualTotalCell
-                id="calc-sudh"
-                manualValue={form.manualInterest}
-                memberValue={live.memberInterest}
-                totalValue={live.interest}
-                disabled={isBusy}
-                onManualChange={(value) =>
-                  setForm((c) => (c ? { ...c, manualInterest: value } : c))
-                }
-              />
-            }
-            rightLabel={personLabel(0, 'PERSON 1')}
-            rightInput={personRightCell(0)}
-          />
-          <BalanceSheetRow
-            leftLabel="TOTAL"
-            leftLabelTheme="period-left"
-            leftValue={formatSheetCell(live.subtotal)}
-            rightLabelTheme="period-right"
-            rightLabel={personLabel(1, 'PERSON 2')}
-            rightInput={personRightCell(1)}
-          />
-          <BalanceSheetRow
-            leftLabel="DEWA"
-            leftLabelTheme="period-left"
-            rightLabelTheme="period-right"
-            leftInput={
-              <ManualTotalCell
-                id="calc-dewa"
-                manualValue={form.manualDewa}
-                memberValue={live.memberDewa}
-                totalValue={live.dewa}
-                disabled={isBusy}
-                onManualChange={(value) =>
-                  setForm((c) => (c ? { ...c, manualDewa: value } : c))
-                }
-              />
-            }
-            rightLabel={personLabel(2, 'PERSON 3')}
-            rightInput={personRightCell(2)}
-          />
-          {extraPersonRows.map((row, offset) => {
-            const index = offset + 3
-            return (
-              <BalanceSheetRow
-                key={index}
-                leftLabelTheme="period-left"
-                rightLabelTheme="period-right"
-                rightLabel={row.name.trim() || `PERSON ${index + 1}`}
-                rightInput={
-                  <div className="flex w-full items-center gap-1">
-                    {personRightCell(index)}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                      disabled={isBusy}
-                      aria-label={`Remove person ${index + 1}`}
-                      onClick={() => removePerson(index)}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </Button>
-                  </div>
-                }
-              />
-            )
-          })}
-          <BalanceSheetRow
-            isTotal
-            totalVariant="period"
-            leftLabel="VAL1"
-            leftLabelTheme="period-left"
-            leftValue={formatSheetCell(live.leftTotal)}
-            rightLabel="VAL2"
-            rightLabelTheme="period-right"
-            rightValue={formatSheetCell(live.rightTotal)}
-          />
-        </div>
-
-        <div className="calc-worksheet-sheet-footer">
+        </>
+      }
+      footer={
+        <div className="flex w-full flex-wrap items-center justify-between gap-2">
           <Button
             type="button"
             variant="outline"
@@ -441,7 +278,147 @@ export function PeriodCalculationSheet() {
               : 'Not started — save TOBILL to begin'}
           </span>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <BalanceSheetScroll minWidth={580} label="Period calculation">
+        <BalanceSheetRow
+          leftLabel="TOBILL"
+          leftLabelTheme="period-left"
+          rightLabelTheme="period-right"
+          leftInput={
+            <SheetNumberInput
+              id="calc-tobill"
+              value={form.totalToBill}
+              disabled={isBusy}
+              onChange={(value) =>
+                setForm((c) => (c ? { ...c, totalToBill: value } : c))
+              }
+            />
+          }
+          rightLabel="HOME"
+          rightInput={
+            <SheetNumberInput
+              id="calc-home"
+              value={form.cashInHome}
+              disabled={isBusy}
+              onChange={(value) =>
+                setForm((c) => (c ? { ...c, cashInHome: value } : c))
+              }
+            />
+          }
+        />
+        <BalanceSheetRow
+          leftLabel="ASOL"
+          leftLabelTheme="period-left"
+          rightLabelTheme="period-right"
+          leftInput={
+            <ManualTotalCell
+              id="calc-asol"
+              manualValue={form.manualAsol}
+              memberValue={live.memberAsol}
+              totalValue={live.asol}
+              disabled={isBusy}
+              onManualChange={(value) =>
+                setForm((c) => (c ? { ...c, manualAsol: value } : c))
+              }
+            />
+          }
+          rightLabel="DOKAN"
+          rightInput={
+            <SheetNumberInput
+              id="calc-shop"
+              value={form.cashInShop}
+              disabled={isBusy}
+              onChange={(value) =>
+                setForm((c) => (c ? { ...c, cashInShop: value } : c))
+              }
+            />
+          }
+        />
+        <BalanceSheetRow
+          leftLabel="SUDH"
+          leftLabelTheme="period-left"
+          rightLabelTheme="period-right"
+          leftInput={
+            <ManualTotalCell
+              id="calc-sudh"
+              manualValue={form.manualInterest}
+              memberValue={live.memberInterest}
+              totalValue={live.interest}
+              disabled={isBusy}
+              onManualChange={(value) =>
+                setForm((c) => (c ? { ...c, manualInterest: value } : c))
+              }
+            />
+          }
+          rightLabel={personLabelInput(0, 'Person 1')}
+          rightInput={personAmountInput(0)}
+        />
+        <BalanceSheetRow
+          leftLabel="TOTAL"
+          leftLabelTheme="period-left"
+          leftValue={formatSheetCell(live.subtotal)}
+          rightLabelTheme="period-right"
+          rightLabel={personLabelInput(1, 'Person 2')}
+          rightInput={personAmountInput(1)}
+        />
+        <BalanceSheetRow
+          leftLabel="DEWA"
+          leftLabelTheme="period-left"
+          rightLabelTheme="period-right"
+          leftInput={
+            <ManualTotalCell
+              id="calc-dewa"
+              manualValue={form.manualDewa}
+              memberValue={live.memberDewa}
+              totalValue={live.dewa}
+              disabled={isBusy}
+              onManualChange={(value) =>
+                setForm((c) => (c ? { ...c, manualDewa: value } : c))
+              }
+            />
+          }
+          rightLabel={personLabelInput(2, 'Person 3')}
+          rightInput={personAmountInput(2)}
+        />
+        {extraPersonRows.map((row, offset) => {
+          const index = offset + 3
+          return (
+            <BalanceSheetRow
+              key={index}
+              leftLabelTheme="period-left"
+              rightLabelTheme="period-right"
+              rightLabel={personLabelInput(index, `Person ${index + 1}`)}
+              rightInput={
+                <div className="flex w-full min-w-0 items-center gap-1">
+                  {personAmountInput(index)}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                    disabled={isBusy}
+                    aria-label={`Remove person ${index + 1}`}
+                    onClick={() => removePerson(index)}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              }
+            />
+          )
+        })}
+        <BalanceSheetRow
+          isTotal
+          totalVariant="period"
+          leftLabel="VAL1"
+          leftLabelTheme="period-left"
+          leftValue={formatSheetCell(live.leftTotal)}
+          rightLabel="VAL2"
+          rightLabelTheme="period-right"
+          rightValue={formatSheetCell(live.rightTotal)}
+        />
+      </BalanceSheetScroll>
+    </WorksheetPanel>
   )
 }

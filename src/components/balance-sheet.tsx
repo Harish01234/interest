@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react'
+import { CheckCircle2, ChevronRight, XCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
+import { SectionCard } from '@/components/patterns/section-card'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
@@ -15,10 +19,10 @@ export function parseSheetAmount(value: string) {
 export type SheetTheme = 'period-left' | 'period-right' | 'main'
 
 type SheetRowProps = {
-  leftLabel?: string
+  leftLabel?: ReactNode
   leftValue?: ReactNode
   leftInput?: ReactNode
-  rightLabel?: string
+  rightLabel?: ReactNode
   rightValue?: ReactNode
   rightInput?: ReactNode
   leftLabelTheme?: SheetTheme
@@ -62,7 +66,7 @@ export function BalanceSheetRow({
       <div
         className={cn(
           'balance-sheet-label',
-          `balance-sheet-label-${leftLabelTheme}`,
+          leftLabel && `balance-sheet-label-${leftLabelTheme}`,
         )}
       >
         {leftLabel}
@@ -75,7 +79,7 @@ export function BalanceSheetRow({
       <div
         className={cn(
           'balance-sheet-label',
-          `balance-sheet-label-${rightLabelTheme}`,
+          rightLabel && `balance-sheet-label-${rightLabelTheme}`,
         )}
       >
         {rightLabel}
@@ -93,6 +97,7 @@ type SheetNumberInputProps = {
   id: string
   value: string
   disabled?: boolean
+  compact?: boolean
   onChange: (value: string) => void
 }
 
@@ -100,6 +105,7 @@ export function SheetNumberInput({
   id,
   value,
   disabled,
+  compact = false,
   onChange,
 }: SheetNumberInputProps) {
   return (
@@ -107,7 +113,36 @@ export function SheetNumberInput({
       id={id}
       type="text"
       inputMode="numeric"
-      className="balance-sheet-input"
+      className={cn('balance-sheet-input', compact && 'balance-sheet-input-compact')}
+      value={value}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  )
+}
+
+type SheetLabelInputProps = {
+  id: string
+  value: string
+  placeholder: string
+  theme: SheetTheme
+  disabled?: boolean
+  onChange: (value: string) => void
+}
+
+export function SheetLabelInput({
+  id,
+  value,
+  placeholder,
+  theme,
+  disabled,
+  onChange,
+}: SheetLabelInputProps) {
+  return (
+    <Input
+      id={id}
+      className={cn('balance-sheet-label-input', `balance-sheet-label-input-${theme}`)}
+      placeholder={placeholder}
       value={value}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
@@ -133,58 +168,105 @@ export function ManualTotalCell({
   onManualChange,
 }: ManualTotalCellProps) {
   return (
-    <div className="balance-sheet-cell-stack">
+    <div className="balance-sheet-manual-cell">
       <span className="balance-sheet-number">{formatSheetCell(totalValue)}</span>
-      <SheetNumberInput
-        id={id}
-        value={manualValue}
-        disabled={disabled}
-        onChange={onManualChange}
-      />
-      {memberValue > 0 ? (
-        <span className="balance-sheet-cell-meta">
-          + members {formatSheetCell(memberValue)}
-        </span>
-      ) : null}
+      <div className="balance-sheet-manual-row">
+        <SheetNumberInput
+          id={id}
+          value={manualValue}
+          disabled={disabled}
+          compact
+          onChange={onManualChange}
+        />
+        {memberValue > 0 ? (
+          <span className="balance-sheet-cell-meta">
+            +{formatSheetCell(memberValue)}
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }
 
-type PersonSheetInputProps = {
-  nameId: string
-  amountId: string
-  name: string
-  amount: string
-  disabled?: boolean
-  onNameChange: (value: string) => void
-  onAmountChange: (value: string) => void
+type WorksheetPanelProps = {
+  title: string
+  formula: string
+  icon: LucideIcon
+  actions: ReactNode
+  isBalanced: boolean
+  difference?: number
+  children: ReactNode
+  footer?: ReactNode
+  variant?: 'period' | 'main'
 }
 
-export function PersonSheetInput({
-  nameId,
-  amountId,
-  name,
-  amount,
-  disabled,
-  onNameChange,
-  onAmountChange,
-}: PersonSheetInputProps) {
+export function WorksheetPanel({
+  title,
+  formula,
+  icon,
+  actions,
+  isBalanced,
+  difference = 0,
+  children,
+  footer,
+  variant = 'period',
+}: WorksheetPanelProps) {
   return (
-    <div className="balance-sheet-person-cell">
-      <Input
-        id={nameId}
-        className="balance-sheet-person-name"
-        placeholder="Name"
-        value={name}
-        disabled={disabled}
-        onChange={(event) => onNameChange(event.target.value)}
-      />
-      <SheetNumberInput
-        id={amountId}
-        value={amount}
-        disabled={disabled}
-        onChange={onAmountChange}
-      />
+    <SectionCard
+      icon={icon}
+      iconVariant={variant === 'period' ? 'chart1' : 'chart3'}
+      title={title}
+      description={formula}
+      actions={actions}
+      footer={footer}
+      className={cn('calc-worksheet-panel', `calc-worksheet-panel-${variant}`)}
+      bodyClassName="space-y-3 min-w-0"
+    >
+      <Badge
+        variant="outline"
+        className={cn(
+          'w-fit gap-1.5 rounded-full px-3 py-1 font-semibold',
+          isBalanced ? 'recon-banner-ok border-transparent' : 'recon-banner-bad border-transparent',
+        )}
+      >
+        {isBalanced ? (
+          <CheckCircle2 className="size-3.5" aria-hidden />
+        ) : (
+          <XCircle className="size-3.5" aria-hidden />
+        )}
+        {isBalanced ? 'Balanced' : `Off by ${formatSheetCell(Math.abs(difference))}`}
+      </Badge>
+
+      {children}
+    </SectionCard>
+  )
+}
+
+export function BalanceSheetScroll({
+  children,
+  minWidth = 560,
+  label,
+}: {
+  children: ReactNode
+  minWidth?: number
+  label: string
+}) {
+  return (
+    <div className="balance-sheet-scroll-wrap">
+      <p className="balance-sheet-scroll-hint" aria-hidden>
+        <ChevronRight className="size-3.5 shrink-0 opacity-70" />
+        Swipe sideways to see all columns
+      </p>
+      <div className="balance-sheet-scroll">
+        <div
+          className="balance-sheet-grid"
+          style={{ minWidth }}
+          role="table"
+          aria-label={label}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   )
 }

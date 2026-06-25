@@ -573,8 +573,10 @@ body {
 
   .section-card-intro {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
     gap: 0.75rem;
+    min-width: 0;
   }
 
   .section-card-body {
@@ -783,25 +785,55 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .balance-sheet-scroll-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+
+  .balance-sheet-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    padding-inline: 0.125rem;
+  }
+
+  @media (min-width: 640px) {
+    .balance-sheet-scroll-hint {
+      display: none;
+    }
+  }
+
+  .balance-sheet-scroll {
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border-subtle);
+    background: var(--card);
+    box-shadow: var(--shadow-elevated);
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
   }
 
   .balance-sheet-grid {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border-subtle);
-    background: var(--card);
-    box-shadow: var(--shadow-elevated);
   }
 
   .balance-sheet-row {
     display: grid;
-    grid-template-columns: minmax(7rem, 1fr) minmax(8rem, 1.25fr) minmax(7rem, 1fr) minmax(
-        8rem,
-        1.25fr
-      );
-    border-bottom: 1px solid oklch(from var(--border) l c h / 0.8);
+    grid-template-columns:
+      minmax(4.75rem, 0.85fr) minmax(5.5rem, 1.15fr) minmax(4.75rem, 0.85fr)
+      minmax(5.5rem, 1.15fr);
+    border-bottom: 1px solid oklch(from var(--border) l c h / 0.85);
   }
 
   .balance-sheet-row:last-child {
@@ -816,10 +848,11 @@ body {
   .balance-sheet-label {
     display: flex;
     align-items: center;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.8125rem;
+    min-width: 0;
+    padding: 0.5rem 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: oklch(from var(--chart-2) 0.42 c h);
     background: oklch(from var(--chart-2) l c h / 0.1);
@@ -834,7 +867,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding: 0.375rem 0.75rem;
+    min-width: 0;
+    padding: 0.375rem 0.5rem;
     border-right: 1px solid oklch(from var(--border) l c h / 0.9);
     background: oklch(from var(--background) l c h / 0.35);
   }
@@ -844,19 +878,28 @@ body {
   }
 
   .balance-sheet-number {
-    font-size: 1.0625rem;
+    font-size: 0.9375rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--foreground);
+    word-break: break-all;
   }
 
   .balance-sheet-input {
-    height: 2.25rem;
+    width: 100%;
+    min-width: 0;
+    height: 2rem;
     border: 1px solid oklch(from var(--chart-1) l c h / 0.35);
     background: var(--background);
     text-align: right;
+    font-size: 0.8125rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+  }
+
+  .balance-sheet-input-compact {
+    height: 1.625rem;
+    font-size: 0.75rem;
   }
 
   .balance-sheet-input:focus-visible {
@@ -917,98 +960,115 @@ body {
     color: oklch(from var(--chart-4) 0.9 c h);
   }
 
-  .balance-sheet-cell-stack {
+  .balance-sheet-manual-cell {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 0.25rem;
     width: 100%;
+    min-width: 0;
+  }
+
+  .balance-sheet-manual-row {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .balance-sheet-manual-row .balance-sheet-input {
+    flex: 1;
+    min-width: 0;
   }
 
   .balance-sheet-cell-meta {
-    font-size: 0.6875rem;
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 600;
     color: var(--muted-foreground);
     font-variant-numeric: tabular-nums;
   }
 
-  .balance-sheet-person-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+  .balance-sheet-label-input {
     width: 100%;
+    min-width: 0;
+    height: 1.75rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: none;
   }
 
-  .balance-sheet-person-name {
-    height: 1.75rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 600;
+  .balance-sheet-label-input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px oklch(from var(--chart-1) l c h / 0.25);
+    border-radius: var(--radius-sm);
+  }
+
+  .balance-sheet-label-input-period-right {
+    color: inherit;
   }
 
   .calc-worksheet {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    min-width: 0;
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 1024px) {
     .calc-worksheet {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr);
       align-items: start;
     }
   }
 
+  @media (min-width: 1280px) {
+    .calc-worksheet {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
   .calc-worksheet-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border-subtle);
-    background: var(--glass-bg-strong);
-    box-shadow: var(--glass-inset);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .calc-worksheet-panel-period {
+    border-color: oklch(from var(--chart-1) l c h / 0.22);
+    box-shadow: var(--shadow-elevated), var(--glass-inset),
+      inset 0 3px 0 0 oklch(from var(--chart-1) l c h / 0.55);
+  }
+
+  .calc-worksheet-panel-main {
+    border-color: oklch(from var(--chart-3) l c h / 0.22);
+    box-shadow: var(--shadow-elevated), var(--glass-inset),
+      inset 0 3px 0 0 oklch(from var(--chart-3) l c h / 0.55);
+  }
+
+  .calc-worksheet-panel-body {
+    min-width: 0;
   }
 
   .calc-worksheet-panel-error {
     color: var(--destructive);
     font-size: 0.875rem;
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg-strong);
   }
 
   .calc-worksheet-panel-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: space-between;
     gap: 0.75rem;
   }
 
-  .calc-worksheet-panel-title {
-    font-size: 0.9375rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
-
-  .calc-worksheet-panel-desc {
-    font-size: 0.75rem;
-    color: var(--muted-foreground);
-  }
-
-  .calc-worksheet-recon {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    align-self: flex-start;
-    padding: 0.375rem 0.75rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border-subtle);
-  }
-
-  .calc-worksheet-sheet-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
+  .calc-worksheet-panel-footer {
+    border-top: 1px solid oklch(from var(--border) l c h / 0.7);
   }
 
   .balance-sheet-hint {
@@ -1107,18 +1167,27 @@ body {
 
   @media (max-width: 640px) {
     .balance-sheet-row {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:
+        minmax(4.25rem, 0.8fr) minmax(5rem, 1.2fr) minmax(4.25rem, 0.8fr)
+        minmax(5rem, 1.2fr);
     }
 
     .balance-sheet-label,
     .balance-sheet-value {
-      font-size: 0.75rem;
-      padding: 0.5rem;
+      padding: 0.375rem 0.4375rem;
     }
 
     .balance-sheet-number {
-      font-size: 0.9375rem;
+      font-size: 0.8125rem;
     }
+  }
+
+  .dashboard-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-gap);
+    min-width: 0;
+    max-width: 100%;
   }
 
   .member-audit {
@@ -1364,11 +1433,5 @@ body {
     .dashboard-overview-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-  }
-
-  .dashboard-workspace {
-    display: flex;
-    flex-direction: column;
-    gap: var(--section-gap);
   }
 }

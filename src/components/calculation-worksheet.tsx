@@ -3,9 +3,9 @@ import { PeriodCalculationSheet } from '@/components/period-calculation-sheet'
 
 export function CalculationWorksheet() {
   return (
-    <div className="calc-worksheet">
+    <section className="calc-worksheet" aria-label="Balance worksheets">
       <PeriodCalculationSheet />
       <MainCalculationSheet />
-    </div>
+    </section>
   )
 }
