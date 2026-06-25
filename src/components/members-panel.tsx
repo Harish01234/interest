@@ -35,6 +35,8 @@ import {
   membersQueryKey,
   membersQueryOptions,
 } from '@/members/queries'
+import { calculationQueryKey } from '@/members/calculation-queries'
+import { mainCalculationQueryKey } from '@/members/main-calculation-queries'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -690,6 +692,8 @@ export function MembersPanel() {
   const invalidateMembers = () => {
     queryClient.invalidateQueries({ queryKey: membersQueryKey })
     queryClient.invalidateQueries({ queryKey: creditSumQueryKey })
+    queryClient.invalidateQueries({ queryKey: calculationQueryKey })
+    queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
   }
 
   const deleteAllMutation = useMutation({

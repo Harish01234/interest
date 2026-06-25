@@ -133,15 +133,16 @@ model Calculation {
 
 
 model MainCalculation {
-  id Int @id @default(autoincrement())
-  TotalTobill Int
-  interest Int
-  Bandak Int
-  jinisChara Int
-  cash Int
+  id          Int      @id @default(autoincrement())
+  TotalTobill Int      @default(0)
+  interest    Int      @default(0) // snapshot from period Calculation.Interest
+  Bandak      Int      @default(0) // sum(credit) of active members
+  jinisChara  Int      @default(0)
+  cash        Int      @default(0) // snapshot: period TotalTobill + Asol + Interest - Dewa
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("main_calculation")
 }
 

@@ -318,22 +318,22 @@ export type MainCalculationScalarWhereWithAggregatesInput = {
 }
 
 export type MainCalculationCreateInput = {
-  TotalTobill: number
-  interest: number
-  Bandak: number
-  jinisChara: number
-  cash: number
+  TotalTobill?: number
+  interest?: number
+  Bandak?: number
+  jinisChara?: number
+  cash?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type MainCalculationUncheckedCreateInput = {
   id?: number
-  TotalTobill: number
-  interest: number
-  Bandak: number
-  jinisChara: number
-  cash: number
+  TotalTobill?: number
+  interest?: number
+  Bandak?: number
+  jinisChara?: number
+  cash?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -361,11 +361,11 @@ export type MainCalculationUncheckedUpdateInput = {
 
 export type MainCalculationCreateManyInput = {
   id?: number
-  TotalTobill: number
-  interest: number
-  Bandak: number
-  jinisChara: number
-  cash: number
+  TotalTobill?: number
+  interest?: number
+  Bandak?: number
+  jinisChara?: number
+  cash?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }

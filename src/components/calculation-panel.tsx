@@ -23,6 +23,7 @@ import {
   type CalculationMemberRow,
 } from '@/members/calculation'
 import { calculationQueryOptions } from '@/members/calculation-queries'
+import { mainCalculationQueryKey } from '@/members/main-calculation-queries'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -184,6 +185,7 @@ export function CalculationPanel() {
     },
     onSuccess: (result) => {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
+      queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
       toast.success('Calculation saved')
     },
@@ -198,6 +200,7 @@ export function CalculationPanel() {
     mutationFn: () => startNewPeriod(),
     onSuccess: (result) => {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
+      queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
       setResetOpen(false)
       toast.success('New period started')

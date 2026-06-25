@@ -3,6 +3,7 @@ import { Calculator } from 'lucide-react'
 
 import { AppShell } from '@/components/app-shell'
 import { CalculationPanel } from '@/components/calculation-panel'
+import { MainCalculationSheet } from '@/components/main-calculation-sheet'
 import { AuthEmptyState } from '@/components/patterns/auth-empty-state'
 import { PageHeader } from '@/components/patterns/page-header'
 import { authClient } from '@/lib/auth-client'
@@ -40,8 +41,9 @@ function CalculationPage() {
           badge="Calculation"
           badgeVariant="primary"
           title="Period calculation"
-          description="Reconcile Total to bill, settlements (Asol + Interest) and new loans (Dewa) against your cash positions."
+          description="Reconcile your overall balance sheet (TOBIL / SUDH vs Laptop / Cash) and the period calculation against cash on hand."
         />
+        <MainCalculationSheet />
         <CalculationPanel />
       </div>
     </AppShell>
