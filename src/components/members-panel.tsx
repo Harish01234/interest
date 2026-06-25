@@ -985,9 +985,8 @@ export function MembersPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete all members?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove all {allMembersCount} member records from the list and
-              exclude them from credit totals. The records are kept and can be
-              restored later.
+              This will permanently delete every member record from the database,
+              including any previously removed ones. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

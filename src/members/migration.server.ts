@@ -144,10 +144,7 @@ export async function migrateMembersImpl(data: {
 export async function deleteAllMembersImpl(): Promise<DeleteAllMembersResult> {
   await requireAuthSession()
 
-  const result = await prisma.member.updateMany({
-    where: { active: true },
-    data: { active: false },
-  })
+  const result = await prisma.member.deleteMany()
 
   return { count: result.count }
 }
