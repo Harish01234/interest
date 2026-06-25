@@ -4,6 +4,7 @@ import type { MemberRecord } from '@/lib/read-csv'
 import {
   compareMembersBySlNo,
   formatCreditTotal,
+  matchesCreditFilter,
   parseCredit,
 } from '@/members/credit'
 import { requireAuthSession } from '@/members/auth.server'
@@ -19,12 +20,10 @@ import type {
 function buildMembersWhere(filters: {
   name: string
   fatherName: string
-  credit: string
   type: GetMembersParams['type']
 }) {
   const name = filters.name.trim()
   const fatherName = filters.fatherName.trim()
-  const credit = filters.credit.trim()
 
   return {
     ...(filters.type !== 'all' ? { type: filters.type } : {}),
@@ -33,9 +32,6 @@ function buildMembersWhere(filters: {
       : {}),
     ...(fatherName
       ? { fatherName: { contains: fatherName, mode: 'insensitive' as const } }
-      : {}),
-    ...(credit
-      ? { credit: { contains: credit, mode: 'insensitive' as const } }
       : {}),
   }
 }
@@ -46,12 +42,19 @@ export async function getMembersImpl(
   await requireAuthSession()
 
   const { page, pageSize, name, fatherName, credit, type } = data
-  const where = buildMembersWhere({ name, fatherName, credit, type })
+  const where = buildMembersWhere({ name, fatherName, type })
+  const creditQuery = credit.trim()
 
-  const matching = await prisma.member.findMany({
+  let matching = await prisma.member.findMany({
     where,
     select: { id: true, slNo: true, credit: true },
   })
+
+  if (creditQuery) {
+    matching = matching.filter((member) =>
+      matchesCreditFilter(member.credit, creditQuery),
+    )
+  }
 
   matching.sort(compareMembersBySlNo)
 
