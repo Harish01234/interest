@@ -1,23 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Banknote, Calculator, PenLine, Plus, Trash2 } from 'lucide-react'
+import { Calculator, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
   BalanceSheetRow,
   BalanceSheetScroll,
   formatSheetCell,
-  ManualTotalCell,
   parseSheetAmount,
-  SheetLabelInput,
-  SheetNumberInput,
   WorksheetPanel,
 } from '@/components/balance-sheet'
-import { SectionSaveButton } from '@/components/section-save-button'
 import {
-  WorksheetActionGroup,
-  WorksheetActionGroups,
-} from '@/components/worksheet-action-group'
+  InlineEditableAmountCell,
+  InlineEditableTextCell,
+} from '@/components/inline-sheet-cell'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import {
@@ -39,6 +35,9 @@ type FormState = {
   cashInShop: string
   cashToPersons: CashPersonRow[]
 }
+
+type ManualField = 'manualAsol' | 'manualInterest' | 'manualDewa'
+type CashField = 'totalToBill' | 'cashInHome' | 'cashInShop'
 
 function dtoToForm(dto: CalculationDto): FormState {
   return {
@@ -67,13 +66,15 @@ export function PeriodCalculationSheet() {
   }, [data])
 
   const saveTotalsMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (override?: Partial<Record<ManualField, string>>) => {
       if (!form) throw new Error('Form is not ready.')
       return savePeriodTotals({
         data: {
-          manualAsol: parseSheetAmount(form.manualAsol),
-          manualInterest: parseSheetAmount(form.manualInterest),
-          manualDewa: parseSheetAmount(form.manualDewa),
+          manualAsol: parseSheetAmount(override?.manualAsol ?? form.manualAsol),
+          manualInterest: parseSheetAmount(
+            override?.manualInterest ?? form.manualInterest,
+          ),
+          manualDewa: parseSheetAmount(override?.manualDewa ?? form.manualDewa),
         },
       })
     },
@@ -81,24 +82,25 @@ export function PeriodCalculationSheet() {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
       queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
-      toast.success('Manual Asol, Sudh & Dewa saved')
+      toast.success('Saved')
     },
     onError: (saveError) => {
       toast.error(
-        saveError instanceof Error ? saveError.message : 'Failed to save totals',
+        saveError instanceof Error ? saveError.message : 'Failed to save',
       )
     },
   })
 
   const saveCashMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (override?: Partial<FormState>) => {
       if (!form) throw new Error('Form is not ready.')
+      const next = { ...form, ...override }
       return saveCashPeriod({
         data: {
-          totalToBill: parseSheetAmount(form.totalToBill),
-          cashInHome: parseSheetAmount(form.cashInHome),
-          cashInShop: parseSheetAmount(form.cashInShop),
-          cashToPersons: form.cashToPersons
+          totalToBill: parseSheetAmount(next.totalToBill),
+          cashInHome: parseSheetAmount(next.cashInHome),
+          cashInShop: parseSheetAmount(next.cashInShop),
+          cashToPersons: next.cashToPersons
             .filter((row) => row.name.trim())
             .map((row) => ({
               name: row.name.trim(),
@@ -111,11 +113,11 @@ export function PeriodCalculationSheet() {
       queryClient.setQueryData(calculationQueryOptions.queryKey, result)
       queryClient.invalidateQueries({ queryKey: mainCalculationQueryKey })
       setForm(dtoToForm(result))
-      toast.success('TOBILL & cash saved')
+      toast.success('Saved')
     },
     onError: (saveError) => {
       toast.error(
-        saveError instanceof Error ? saveError.message : 'Failed to save cash',
+        saveError instanceof Error ? saveError.message : 'Failed to save',
       )
     },
   })
@@ -179,6 +181,25 @@ export function PeriodCalculationSheet() {
 
   const isBusy = saveTotalsMutation.isPending || saveCashMutation.isPending
 
+  const patchForm = (patch: Partial<FormState>) =>
+    setForm((current) => (current ? { ...current, ...patch } : current))
+
+  const patchManualField = (field: ManualField, value: string) =>
+    patchForm({ [field]: value })
+
+  const patchCashField = (field: CashField, value: string) =>
+    patchForm({ [field]: value })
+
+  const saveManualField = (field: ManualField, value: string) => {
+    patchManualField(field, value)
+    saveTotalsMutation.mutate({ [field]: value })
+  }
+
+  const saveCashField = (field: CashField, value: string) => {
+    patchCashField(field, value)
+    saveCashMutation.mutate({ [field]: value })
+  }
+
   const getPersonRow = (index: number): CashPersonRow =>
     form.cashToPersons[index] ?? { name: '', amount: '' }
 
@@ -193,6 +214,16 @@ export function PeriodCalculationSheet() {
       return { ...current, cashToPersons: rows }
     })
 
+  const savePersonField = (index: number, patch: Partial<CashPersonRow>) => {
+    const rows = [...form.cashToPersons]
+    while (rows.length <= index) {
+      rows.push({ name: '', amount: '' })
+    }
+    rows[index] = { ...rows[index], ...patch }
+    patchForm({ cashToPersons: rows })
+    saveCashMutation.mutate({ cashToPersons: rows })
+  }
+
   const addPerson = () =>
     setForm((current) =>
       current
@@ -203,33 +234,35 @@ export function PeriodCalculationSheet() {
         : current,
     )
 
-  const removePerson = (index: number) =>
-    setForm((current) =>
-      current
-        ? {
-            ...current,
-            cashToPersons: current.cashToPersons.filter((_, i) => i !== index),
-          }
-        : current,
-    )
+  const removePerson = (index: number) => {
+    const rows = form.cashToPersons.filter((_, i) => i !== index)
+    patchForm({ cashToPersons: rows })
+    saveCashMutation.mutate({ cashToPersons: rows })
+  }
 
-  const personLabelInput = (index: number, fallback: string) => (
-    <SheetLabelInput
+  const personLabelCell = (index: number, fallback: string) => (
+    <InlineEditableTextCell
       id={`calc-person-name-${index}`}
       value={getPersonRow(index).name}
       placeholder={fallback}
-      theme="period-right"
+      uppercase
+      ariaLabel={`person ${index + 1} name`}
       disabled={isBusy}
+      pending={saveCashMutation.isPending}
       onChange={(value) => updatePerson(index, { name: value })}
+      onSave={(value) => savePersonField(index, { name: value })}
     />
   )
 
-  const personAmountInput = (index: number) => (
-    <SheetNumberInput
+  const personAmountCell = (index: number) => (
+    <InlineEditableAmountCell
       id={`calc-person-amount-${index}`}
       value={getPersonRow(index).amount}
+      ariaLabel={`person ${index + 1} amount`}
       disabled={isBusy}
+      pending={saveCashMutation.isPending}
       onChange={(value) => updatePerson(index, { amount: value })}
+      onSave={(value) => savePersonField(index, { amount: value })}
     />
   )
 
@@ -243,36 +276,6 @@ export function PeriodCalculationSheet() {
       formula="ToBill + Asol + Interest − Dewa = Cash on hand"
       isBalanced={live.isBalanced}
       difference={live.difference}
-      actionGroups={
-        <WorksheetActionGroups>
-          <WorksheetActionGroup
-            accent="period"
-            title="Manual adjustments"
-            description="Save your manual Asol, Sudh (interest), and Dewa entries. Member credits are added automatically."
-          >
-            <SectionSaveButton
-              label="Save Asol, Sudh & Dewa"
-              icon={PenLine}
-              pending={saveTotalsMutation.isPending}
-              disabled={isBusy}
-              onClick={() => saveTotalsMutation.mutate()}
-            />
-          </WorksheetActionGroup>
-          <WorksheetActionGroup
-            accent="period"
-            title="Billing & cash on hand"
-            description="Save TOBILL, home/shop cash, and person payments. Entering TOBILL starts the billing period."
-          >
-            <SectionSaveButton
-              label="Save TOBILL & cash"
-              icon={Banknote}
-              pending={saveCashMutation.isPending}
-              disabled={isBusy}
-              onClick={() => saveCashMutation.mutate()}
-            />
-          </WorksheetActionGroup>
-        </WorksheetActionGroups>
-      }
       footer={
         <Button
           type="button"
@@ -286,30 +289,35 @@ export function PeriodCalculationSheet() {
         </Button>
       }
     >
+      <p className="balance-sheet-hint text-muted-foreground">
+        Tap the pencil icon to edit a value, then confirm with the check mark.
+      </p>
       <BalanceSheetScroll minWidth={580} label="Period calculation">
         <BalanceSheetRow
           leftLabel="TOBILL"
           leftLabelTheme="period-left"
           rightLabelTheme="period-right"
           leftInput={
-            <SheetNumberInput
+            <InlineEditableAmountCell
               id="calc-tobill"
               value={form.totalToBill}
+              ariaLabel="TOBILL"
               disabled={isBusy}
-              onChange={(value) =>
-                setForm((c) => (c ? { ...c, totalToBill: value } : c))
-              }
+              pending={saveCashMutation.isPending}
+              onChange={(value) => patchCashField('totalToBill', value)}
+              onSave={(value) => saveCashField('totalToBill', value)}
             />
           }
           rightLabel="HOME"
           rightInput={
-            <SheetNumberInput
+            <InlineEditableAmountCell
               id="calc-home"
               value={form.cashInHome}
+              ariaLabel="home cash"
               disabled={isBusy}
-              onChange={(value) =>
-                setForm((c) => (c ? { ...c, cashInHome: value } : c))
-              }
+              pending={saveCashMutation.isPending}
+              onChange={(value) => patchCashField('cashInHome', value)}
+              onSave={(value) => saveCashField('cashInHome', value)}
             />
           }
         />
@@ -318,26 +326,28 @@ export function PeriodCalculationSheet() {
           leftLabelTheme="period-left"
           rightLabelTheme="period-right"
           leftInput={
-            <ManualTotalCell
+            <InlineEditableAmountCell
               id="calc-asol"
-              manualValue={form.manualAsol}
-              memberValue={live.memberAsol}
-              totalValue={live.asol}
+              value={form.manualAsol}
+              displayAmount={live.asol}
+              memberAddon={live.memberAsol}
+              ariaLabel="manual Asol"
               disabled={isBusy}
-              onManualChange={(value) =>
-                setForm((c) => (c ? { ...c, manualAsol: value } : c))
-              }
+              pending={saveTotalsMutation.isPending}
+              onChange={(value) => patchManualField('manualAsol', value)}
+              onSave={(value) => saveManualField('manualAsol', value)}
             />
           }
           rightLabel="DOKAN"
           rightInput={
-            <SheetNumberInput
+            <InlineEditableAmountCell
               id="calc-shop"
               value={form.cashInShop}
+              ariaLabel="shop cash"
               disabled={isBusy}
-              onChange={(value) =>
-                setForm((c) => (c ? { ...c, cashInShop: value } : c))
-              }
+              pending={saveCashMutation.isPending}
+              onChange={(value) => patchCashField('cashInShop', value)}
+              onSave={(value) => saveCashField('cashInShop', value)}
             />
           }
         />
@@ -346,46 +356,48 @@ export function PeriodCalculationSheet() {
           leftLabelTheme="period-left"
           rightLabelTheme="period-right"
           leftInput={
-            <ManualTotalCell
+            <InlineEditableAmountCell
               id="calc-sudh"
-              manualValue={form.manualInterest}
-              memberValue={live.memberInterest}
-              totalValue={live.interest}
+              value={form.manualInterest}
+              displayAmount={live.interest}
+              memberAddon={live.memberInterest}
+              ariaLabel="manual Sudh"
               disabled={isBusy}
-              onManualChange={(value) =>
-                setForm((c) => (c ? { ...c, manualInterest: value } : c))
-              }
+              pending={saveTotalsMutation.isPending}
+              onChange={(value) => patchManualField('manualInterest', value)}
+              onSave={(value) => saveManualField('manualInterest', value)}
             />
           }
-          rightLabel={personLabelInput(0, 'Person 1')}
-          rightInput={personAmountInput(0)}
+          rightLabel={personLabelCell(0, 'Person 1')}
+          rightInput={personAmountCell(0)}
         />
         <BalanceSheetRow
           leftLabel="TOTAL"
           leftLabelTheme="period-left"
           leftValue={formatSheetCell(live.subtotal)}
           rightLabelTheme="period-right"
-          rightLabel={personLabelInput(1, 'Person 2')}
-          rightInput={personAmountInput(1)}
+          rightLabel={personLabelCell(1, 'Person 2')}
+          rightInput={personAmountCell(1)}
         />
         <BalanceSheetRow
           leftLabel="DEWA"
           leftLabelTheme="period-left"
           rightLabelTheme="period-right"
           leftInput={
-            <ManualTotalCell
+            <InlineEditableAmountCell
               id="calc-dewa"
-              manualValue={form.manualDewa}
-              memberValue={live.memberDewa}
-              totalValue={live.dewa}
+              value={form.manualDewa}
+              displayAmount={live.dewa}
+              memberAddon={live.memberDewa}
+              ariaLabel="manual Dewa"
               disabled={isBusy}
-              onManualChange={(value) =>
-                setForm((c) => (c ? { ...c, manualDewa: value } : c))
-              }
+              pending={saveTotalsMutation.isPending}
+              onChange={(value) => patchManualField('manualDewa', value)}
+              onSave={(value) => saveManualField('manualDewa', value)}
             />
           }
-          rightLabel={personLabelInput(2, 'Person 3')}
-          rightInput={personAmountInput(2)}
+          rightLabel={personLabelCell(2, 'Person 3')}
+          rightInput={personAmountCell(2)}
         />
         {extraPersonRows.map((row, offset) => {
           const index = offset + 3
@@ -394,15 +406,15 @@ export function PeriodCalculationSheet() {
               key={index}
               leftLabelTheme="period-left"
               rightLabelTheme="period-right"
-              rightLabel={personLabelInput(index, `Person ${index + 1}`)}
+              rightLabel={personLabelCell(index, `Person ${index + 1}`)}
               rightInput={
-                <div className="flex w-full min-w-0 items-center gap-1">
-                  {personAmountInput(index)}
+                <div className="inline-sheet-cell inline-sheet-cell-with-extra">
+                  {personAmountCell(index)}
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                    className="inline-sheet-cell-action inline-sheet-cell-action-destructive"
                     disabled={isBusy}
                     aria-label={`Remove person ${index + 1}`}
                     onClick={() => removePerson(index)}
