@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Bookmark, Scale } from 'lucide-react'
+import { Scale } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
@@ -8,14 +8,9 @@ import {
   BalanceSheetScroll,
   formatSheetCell,
   parseSheetAmount,
-  SheetNumberInput,
   WorksheetPanel,
 } from '@/components/balance-sheet'
-import { SectionSaveButton } from '@/components/section-save-button'
-import {
-  WorksheetActionGroup,
-  WorksheetActionGroups,
-} from '@/components/worksheet-action-group'
+import { InlineEditableAmountCell } from '@/components/inline-sheet-cell'
 import { Spinner } from '@/components/ui/spinner'
 import {
   saveMainCalculation,
@@ -52,20 +47,20 @@ export function MainCalculationSheet() {
   }, [data])
 
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (override?: Partial<MainFormState>) => {
       if (!form) throw new Error('Form is not ready.')
 
       return saveMainCalculation({
         data: {
-          totalToBill: parseSheetAmount(form.totalToBill),
-          jinisChara: parseSheetAmount(form.jinisChara),
+          totalToBill: parseSheetAmount(override?.totalToBill ?? form.totalToBill),
+          jinisChara: parseSheetAmount(override?.jinisChara ?? form.jinisChara),
         },
       })
     },
     onSuccess: (result) => {
       queryClient.setQueryData(mainCalculationQueryOptions.queryKey, result)
       setForm(dtoToForm(result))
-      toast.success('TOBIL & Jinish chara saved')
+      toast.success('Saved')
     },
     onError: (saveError) => {
       toast.error(
@@ -114,6 +109,11 @@ export function MainCalculationSheet() {
 
   const isBusy = saveMutation.isPending
 
+  const saveField = (field: keyof MainFormState, value: string) => {
+    setForm((current) => (current ? { ...current, [field]: value } : current))
+    saveMutation.mutate({ [field]: value })
+  }
+
   return (
     <WorksheetPanel
       variant="main"
@@ -122,23 +122,6 @@ export function MainCalculationSheet() {
       formula="TOBIL + SUDH = Laptop + Jinish chara + Cash"
       isBalanced={live.isBalanced}
       difference={live.difference}
-      actionGroups={
-        <WorksheetActionGroups className="worksheet-action-groups-single">
-          <WorksheetActionGroup
-            accent="main"
-            title="Main balance inputs"
-            description="Save TOBIL and Jinish chara. Laptop (active credits), Sudh, and Cash sync from other sheets."
-          >
-            <SectionSaveButton
-              label="Save TOBIL & Jinish chara"
-              icon={Bookmark}
-              pending={saveMutation.isPending}
-              disabled={isBusy}
-              onClick={() => saveMutation.mutate()}
-            />
-          </WorksheetActionGroup>
-        </WorksheetActionGroups>
-      }
       footer={
         <p className="text-xs text-muted-foreground">
           <span className="font-medium text-foreground">LAPTOP</span> = active
@@ -149,19 +132,25 @@ export function MainCalculationSheet() {
         </p>
       }
     >
+      <p className="balance-sheet-hint text-muted-foreground">
+        Tap the pencil icon to edit a value, then confirm with the check mark.
+      </p>
       <BalanceSheetScroll minWidth={480} label="Main calculation balance sheet">
         <BalanceSheetRow
           leftLabel="TOBIL"
           leftLabelTheme="main"
           rightLabelTheme="main"
           leftInput={
-            <SheetNumberInput
+            <InlineEditableAmountCell
               id="main-tobil"
               value={form.totalToBill}
+              ariaLabel="TOBIL"
               disabled={isBusy}
+              pending={saveMutation.isPending}
               onChange={(value) =>
                 setForm((c) => (c ? { ...c, totalToBill: value } : c))
               }
+              onSave={(value) => saveField('totalToBill', value)}
             />
           }
           rightLabel="LAPTOP"
@@ -174,13 +163,16 @@ export function MainCalculationSheet() {
           leftValue={formatSheetCell(live.interest)}
           rightLabel="JINISH CHARA"
           rightInput={
-            <SheetNumberInput
+            <InlineEditableAmountCell
               id="main-jinish"
               value={form.jinisChara}
+              ariaLabel="Jinish chara"
               disabled={isBusy}
+              pending={saveMutation.isPending}
               onChange={(value) =>
                 setForm((c) => (c ? { ...c, jinisChara: value } : c))
               }
+              onSave={(value) => saveField('jinisChara', value)}
             />
           }
         />

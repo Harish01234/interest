@@ -1,7 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { BarChart3, Users } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { BarChart3, PenLine, Users } from 'lucide-react'
 
 import { AppShell } from '@/components/app-shell'
+import { CalculationSummarySection } from '@/components/calculation-summary-section'
 import { CsvForm } from '@/components/csvform'
 import { MembersPanel } from '@/components/members-panel'
 import { AuthEmptyState } from '@/components/patterns/auth-empty-state'
@@ -9,6 +10,7 @@ import { MiniBarChart } from '@/components/patterns/mini-bar-chart'
 import { PageHeader } from '@/components/patterns/page-header'
 import { SectionCard } from '@/components/patterns/section-card'
 import { authClient } from '@/lib/auth-client'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 export const Route = createFileRoute('/dashboard')({
@@ -115,6 +117,29 @@ function DashboardPage() {
               </div>
             </SectionCard>
           </div>
+        </section>
+
+        <section aria-labelledby="dashboard-calculations-heading" className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="space-y-1">
+              <h2
+                id="dashboard-calculations-heading"
+                className="font-heading text-lg font-semibold tracking-tight text-foreground"
+              >
+                Calculation totals
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Final values only — edit from the values page.
+              </p>
+            </div>
+            <Button asChild className="btn-primary-glow shrink-0" size="sm">
+              <Link to="/values">
+                <PenLine className="size-4" />
+                Edit values
+              </Link>
+            </Button>
+          </div>
+          <CalculationSummarySection />
         </section>
 
         <section aria-labelledby="dashboard-import-heading" className="space-y-3">

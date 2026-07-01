@@ -7,6 +7,55 @@ import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 
+export function SheetReadOnlyAmountCell({
+  amount,
+  memberAddon = 0,
+}: {
+  amount: number
+  memberAddon?: number
+}) {
+  return (
+    <div className="inline-sheet-cell inline-sheet-cell-readonly">
+      <div className="inline-sheet-cell-display">
+        <span className="balance-sheet-number">{formatSheetCell(amount)}</span>
+        {memberAddon > 0 ? (
+          <span className="balance-sheet-cell-meta">
+            incl. +{formatSheetCell(memberAddon)} from members
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function SheetReadOnlyTextCell({
+  value,
+  placeholder,
+  uppercase = false,
+  className,
+}: {
+  value: string
+  placeholder: string
+  uppercase?: boolean
+  className?: string
+}) {
+  const displayText = value.trim() || placeholder
+
+  return (
+    <div className={cn('inline-sheet-cell inline-sheet-cell-readonly', className)}>
+      <span
+        className={cn(
+          'inline-sheet-cell-text',
+          !value.trim() && 'text-muted-foreground',
+          uppercase && 'uppercase',
+        )}
+      >
+        {displayText}
+      </span>
+    </div>
+  )
+}
+
 type InlineEditableAmountCellProps = {
   id: string
   value: string

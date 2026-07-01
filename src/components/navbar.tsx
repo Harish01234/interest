@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Menu,
   MonitorSmartphone,
+  PenLine,
   Sparkles,
 } from 'lucide-react'
 
@@ -26,6 +27,7 @@ const navItems = [
   { to: '/', label: 'Home', icon: Sparkles },
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/calculation', label: 'Calculation', icon: Calculator },
+  { to: '/values', label: 'Values', icon: PenLine },
   { to: '/sessions', label: 'Sessions', icon: MonitorSmartphone },
 ] as const
 

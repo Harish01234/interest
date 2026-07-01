@@ -1,19 +1,20 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Calculator, PenLine } from 'lucide-react'
+import { PenLine } from 'lucide-react'
 
 import { AppShell } from '@/components/app-shell'
 import { CalculationPanel } from '@/components/calculation-panel'
+import { CalculationPeriodToolbar } from '@/components/calculation-period-toolbar'
 import { CalculationWorksheet } from '@/components/calculation-worksheet'
 import { AuthEmptyState } from '@/components/patterns/auth-empty-state'
 import { PageHeader } from '@/components/patterns/page-header'
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
 
-export const Route = createFileRoute('/calculation')({
-  component: CalculationPage,
+export const Route = createFileRoute('/values')({
+  component: ValuesPage,
 })
 
-function CalculationPage() {
+function ValuesPage() {
   const { data: session } = authClient.useSession()
 
   if (!session?.user) {
@@ -21,14 +22,14 @@ function CalculationPage() {
       <AppShell withGlow>
         <div className="page-section">
           <PageHeader
-            badge="Calculation"
-            title="Calculation overview"
-            description="Sign in to view your period and main calculation totals."
+            badge="Values"
+            title="Manage calculation values"
+            description="Sign in to edit period and main calculation values."
           />
           <AuthEmptyState
-            icon={Calculator}
+            icon={PenLine}
             title="No active session"
-            description="Authenticate to view your calculation summary."
+            description="Authenticate to add and update calculation values."
           />
         </div>
       </AppShell>
@@ -39,20 +40,18 @@ function CalculationPage() {
     <AppShell withGlow>
       <div className="dashboard-workspace">
         <PageHeader
-          badge="Calculation"
+          badge="Values"
           badgeVariant="primary"
-          title="Calculation overview"
-          description="Final period and main balance sheet values. Edit or update numbers from the values page."
+          title="Manage calculation values"
+          description="Edit period totals, cash on hand, and main balance sheet inputs. Saved values appear on the calculation overview."
           actions={
-            <Button asChild className="btn-primary-glow" size="sm">
-              <Link to="/values">
-                <PenLine className="size-4" />
-                Edit values
-              </Link>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/calculation">View overview</Link>
             </Button>
           }
         />
-        <CalculationWorksheet readOnly />
+        <CalculationPeriodToolbar />
+        <CalculationWorksheet />
         <CalculationPanel />
       </div>
     </AppShell>
