@@ -27,7 +27,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
-import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -62,6 +61,7 @@ type ImportResult = {
 type MemberV2CsvImportProps = {
   existingCount: number
   onImport: (input: ImportMembersV2Input) => Promise<ImportResult>
+  onDeleteAll: () => Promise<{ count: number }>
   onImportComplete: () => Promise<void>
 }
 
@@ -91,6 +91,7 @@ const PREVIEW_COLUMNS: Array<{
 export function MemberV2CsvImport({
   existingCount,
   onImport,
+  onDeleteAll,
   onImportComplete,
 }: MemberV2CsvImportProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -99,8 +100,8 @@ export function MemberV2CsvImport({
     (CsvPreviewState & { headerRow: number }) | null
   >(null)
   const [isParsing, setIsParsing] = React.useState(false)
-  const [replaceExisting, setReplaceExisting] = React.useState(true)
-  const [confirmOpen, setConfirmOpen] = React.useState(false)
+  const [migrateConfirmOpen, setMigrateConfirmOpen] = React.useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false)
   const [importResult, setImportResult] = React.useState<ImportResult | null>(
     null,
   )
@@ -111,24 +112,38 @@ export function MemberV2CsvImport({
     },
     onSuccess: async (result) => {
       setImportResult(result)
-      setConfirmOpen(false)
+      setMigrateConfirmOpen(false)
       setFile(null)
       setPreview(null)
       if (inputRef.current) {
         inputRef.current.value = ''
       }
 
-      toast.success(
-        result.deletedCount > 0
-          ? `Deleted ${result.deletedCount} and imported ${result.importedCount} members`
-          : `Imported ${result.importedCount} members`,
-      )
+      toast.success(`Migrated ${result.importedCount} members to database`)
 
       await onImportComplete()
     },
     onError: (error) => {
-      setConfirmOpen(false)
-      toast.error(error.message || 'Failed to import members')
+      setMigrateConfirmOpen(false)
+      toast.error(error.message || 'Failed to migrate members')
+    },
+  })
+
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      return await onDeleteAll()
+    },
+    onSuccess: async (result) => {
+      setDeleteConfirmOpen(false)
+      setImportResult(null)
+      toast.success(
+        `Deleted ${result.count} member${result.count === 1 ? '' : 's'}`,
+      )
+      await onImportComplete()
+    },
+    onError: (error) => {
+      setDeleteConfirmOpen(false)
+      toast.error(error.message || 'Failed to delete members')
     },
   })
 
@@ -187,36 +202,42 @@ export function MemberV2CsvImport({
     ? mapPreviewRowsToMembers(preview.allRows)
     : null
 
-  const canImport =
+  const isBusy = importMutation.isPending || deleteAllMutation.isPending
+
+  const canMigrate =
     preview !== null &&
     preview.missingFields.length === 0 &&
     mappedMembers !== null &&
     mappedMembers.members.length > 0 &&
-    !importMutation.isPending
+    !isBusy
 
-  function handleImportClick() {
+  function handleMigrateClick() {
     if (!mappedMembers || mappedMembers.members.length === 0) {
-      toast.error('No valid rows to import')
+      toast.error('No valid rows to migrate')
       return
     }
 
-    if (replaceExisting && existingCount > 0) {
-      setConfirmOpen(true)
-      return
-    }
-
-    runImport()
+    setMigrateConfirmOpen(true)
   }
 
-  function runImport() {
+  function runMigrate() {
     if (!mappedMembers) {
       return
     }
 
     importMutation.mutate({
-      replaceExisting,
+      replaceExisting: false,
       members: mappedMembers.members,
     })
+  }
+
+  function handleDeleteAllClick() {
+    if (existingCount === 0) {
+      toast.error('No members to delete')
+      return
+    }
+
+    setDeleteConfirmOpen(true)
   }
 
   return (
@@ -225,43 +246,40 @@ export function MemberV2CsvImport({
         icon={FileSpreadsheet}
         iconVariant="chart2"
         title="CSV import & migrate"
-        description="Upload a CSV, review all mapped rows, then import to the database. Optionally delete existing members first."
+        description="Upload a CSV, review all mapped rows, then migrate to the database or delete all existing members separately."
         footer={
-          preview ? (
-            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <label className="flex items-center gap-3 text-sm">
-                <Switch
-                  checked={replaceExisting}
-                  onCheckedChange={setReplaceExisting}
-                  disabled={importMutation.isPending}
-                />
-                <span>
-                  Delete all existing members before import
-                  {existingCount > 0 ? (
-                    <span className="text-muted-foreground">
-                      {' '}
-                      ({existingCount} currently in database)
-                    </span>
-                  ) : null}
-                </span>
-              </label>
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive sm:w-auto"
+              disabled={existingCount === 0 || isBusy}
+              aria-busy={deleteAllMutation.isPending}
+              onClick={handleDeleteAllClick}
+            >
+              {deleteAllMutation.isPending ? (
+                <Spinner className="size-4" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+              Delete all{existingCount > 0 ? ` (${existingCount})` : ''}
+            </Button>
 
-              <Button
-                type="button"
-                className="btn-primary-glow w-full sm:w-auto"
-                disabled={!canImport}
-                aria-busy={importMutation.isPending}
-                onClick={handleImportClick}
-              >
-                {importMutation.isPending ? <Spinner className="size-4" /> : null}
-                {importMutation.isPending
-                  ? 'Migrating…'
-                  : replaceExisting
-                    ? `Delete all & import ${mappedMembers?.members.length ?? 0}`
-                    : `Import ${mappedMembers?.members.length ?? 0} members`}
-              </Button>
-            </div>
-          ) : null
+            <Button
+              type="button"
+              className="btn-primary-glow w-full sm:w-auto"
+              disabled={!canMigrate}
+              aria-busy={importMutation.isPending}
+              onClick={handleMigrateClick}
+            >
+              {importMutation.isPending ? <Spinner className="size-4" /> : null}
+              {importMutation.isPending
+                ? 'Migrating…'
+                : preview && mappedMembers
+                  ? `Migrate ${mappedMembers.members.length} to database`
+                  : 'Migrate to database'}
+            </Button>
+          </div>
         }
         footerAlign="between"
       >
@@ -275,7 +293,7 @@ export function MemberV2CsvImport({
               id="member-v2-csv-upload"
               type="file"
               accept=".csv,text/csv"
-              disabled={isParsing || importMutation.isPending}
+              disabled={isParsing || isBusy}
               onChange={handleFileChange}
               className="cursor-pointer file:mr-3"
             />
@@ -330,20 +348,26 @@ export function MemberV2CsvImport({
         </div>
       </SectionCard>
 
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialog open={migrateConfirmOpen} onOpenChange={setMigrateConfirmOpen}>
         <AlertDialogContent className="surface-glass-modal">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete all and import?</AlertDialogTitle>
+            <AlertDialogTitle>Migrate to database?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete{' '}
-              <span className="font-semibold text-foreground">
-                {existingCount} existing member{existingCount === 1 ? '' : 's'}
-              </span>{' '}
-              and replace them with{' '}
+              This will import{' '}
               <span className="font-semibold text-foreground">
                 {mappedMembers?.members.length ?? 0} members
               </span>{' '}
-              from your CSV. This action cannot be undone.
+              from your CSV into the database
+              {existingCount > 0 ? (
+                <>
+                  {' '}
+                  alongside{' '}
+                  <span className="font-semibold text-foreground">
+                    {existingCount} existing member{existingCount === 1 ? '' : 's'}
+                  </span>
+                </>
+              ) : null}
+              . Use Delete all first if you want a clean replacement.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -352,11 +376,11 @@ export function MemberV2CsvImport({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="btn-primary-glow"
               disabled={importMutation.isPending}
               onClick={(event) => {
                 event.preventDefault()
-                runImport()
+                runMigrate()
               }}
             >
               {importMutation.isPending ? (
@@ -366,8 +390,49 @@ export function MemberV2CsvImport({
                 </>
               ) : (
                 <>
+                  <Database className="size-4" />
+                  Migrate to database
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent className="surface-glass-modal">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete all members?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete{' '}
+              <span className="font-semibold text-foreground">
+                {existingCount} member{existingCount === 1 ? '' : 's'}
+              </span>{' '}
+              from the database. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAllMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleteAllMutation.isPending}
+              onClick={(event) => {
+                event.preventDefault()
+                deleteAllMutation.mutate()
+              }}
+            >
+              {deleteAllMutation.isPending ? (
+                <>
+                  <Spinner className="size-4" />
+                  Deleting…
+                </>
+              ) : (
+                <>
                   <Trash2 className="size-4" />
-                  Delete all & import
+                  Delete all
                 </>
               )}
             </AlertDialogAction>

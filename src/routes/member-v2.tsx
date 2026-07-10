@@ -26,6 +26,7 @@ import {
 import { MemberV2StatsGrid } from '@/features/member-v2/components/member-v2-stats-section'
 import {
   createMemberV2,
+  deleteAllMemberV2,
   deleteMemberV2,
   getMemberV2Summary,
   importMembersV2,
@@ -68,6 +69,7 @@ function MemberV2Page() {
   const deleteFn = useServerFn(deleteMemberV2)
   const toggleFn = useServerFn(toggleMemberV2Active)
   const importFn = useServerFn(importMembersV2)
+  const deleteAllFn = useServerFn(deleteAllMemberV2)
 
   const [form, setForm] = React.useState<MemberFormState>(emptyForm)
   const [editForm, setEditForm] = React.useState<EditFormState | null>(null)
@@ -310,6 +312,7 @@ function MemberV2Page() {
         <MemberV2CsvImport
           existingCount={members.length}
           onImport={(input) => importFn({ data: input })}
+          onDeleteAll={() => deleteAllFn()}
           onImportComplete={refreshData}
         />
 
