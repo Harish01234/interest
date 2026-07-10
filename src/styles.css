@@ -1758,4 +1758,60 @@ body {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+  .csv-preview-table-wrap {
+    overflow-x: auto;
+  }
+
+  .csv-preview-table {
+    min-width: 42rem;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .csv-preview-table th,
+  .csv-preview-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .csv-preview-table th:nth-child(1),
+  .csv-preview-table td:nth-child(1) {
+    width: 22%;
+  }
+
+  .csv-preview-table th:nth-child(2),
+  .csv-preview-table td:nth-child(2) {
+    width: 14%;
+  }
+
+  .csv-preview-table th:nth-child(3),
+  .csv-preview-table td:nth-child(3) {
+    width: 10%;
+  }
+
+  .csv-preview-table th:nth-child(4),
+  .csv-preview-table td:nth-child(4) {
+    width: 16%;
+  }
+
+  .csv-preview-table th:nth-child(5),
+  .csv-preview-table td:nth-child(5) {
+    width: 22%;
+  }
+
+  .csv-preview-table th:nth-child(6),
+  .csv-preview-table td:nth-child(6) {
+    width: 16%;
+  }
+
+  .csv-preview-cell {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .csv-import-scroll {
+    max-height: 28rem;
+    overflow: auto;
+  }
 }

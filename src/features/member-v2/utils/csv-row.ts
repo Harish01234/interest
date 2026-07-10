@@ -16,5 +16,6 @@ import type {
       phoneNo: headerMap.phoneNo ? rawRow[headerMap.phoneNo] : undefined,
       type: headerMap.type ? rawRow[headerMap.type] : undefined,
       jinsis: headerMap.jinsis ? rawRow[headerMap.jinsis] : undefined,
+      remarks: headerMap.remarks ? rawRow[headerMap.remarks] : undefined,
     }
   }

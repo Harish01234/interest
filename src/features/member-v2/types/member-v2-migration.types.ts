@@ -6,6 +6,7 @@ export type MemberV2CsvField =
   | "phoneNo"
   | "type"
   | "jinsis"
+  | "remarks"
 
 export type CsvRawRow = Record<string, string>
 
@@ -19,4 +20,5 @@ export type MemberV2PreviewRow = {
   phoneNo?: string
   type?: string
   jinsis?: string
+  remarks?: string
 }

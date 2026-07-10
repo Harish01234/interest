@@ -8,7 +8,7 @@ import type {
   import { buildHeaderMap } from "./csv-header"
   import { mapCsvRowToPreviewRow } from "./csv-row"
   
-  const requiredFields: MemberV2CsvField[] = ["name", "amount", "phoneNo"]
+  const requiredFields: MemberV2CsvField[] = ["name", "amount"]
   
   function getMissingFields(headerMap: HeaderMap) {
     return requiredFields.filter((field) => !headerMap[field])

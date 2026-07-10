@@ -8,7 +8,9 @@ import {
   updateMemberV2Schema,
   memberV2IdSchema,
   toggleMemberV2Schema,
+  importMembersV2Schema,
 } from './member-v2.schema'
+import { resolveMemberV2Date } from './utils/parse-member-v2-date'
 
 function cleanOptional(value?: string | null) {
   const cleaned = value?.trim()
@@ -69,7 +71,7 @@ export const createMemberV2 = createServerFn({ method: 'POST' })
         percentage: data.percentage ?? 0,
         remarks: cleanOptional(data.remarks),
         mobileNo: cleanOptional(data.mobileNo),
-        date: data.date ? new Date(data.date) : new Date(),
+        date: resolveMemberV2Date(data.date),
         userId,
       },
     })
@@ -113,7 +115,7 @@ export const updateMemberV2 = createServerFn({ method: 'POST' })
     }
 
     if (data.date !== undefined) {
-      updateData.date = new Date(data.date)
+      updateData.date = resolveMemberV2Date(data.date)
     }
 
     const result = await prisma.memberV2.updateMany({
@@ -222,3 +224,52 @@ export const getMemberV2Summary = createServerFn({ method: 'GET' }).handler(
     }
   },
 )
+
+export const deleteAllMemberV2 = createServerFn({ method: 'POST' }).handler(
+  async () => {
+    const session = await requireAuthSession()
+    const userId = session.user.id
+
+    const result = await prisma.memberV2.deleteMany({
+      where: { userId },
+    })
+
+    return { count: result.count }
+  },
+)
+
+export const importMembersV2 = createServerFn({ method: 'POST' })
+  .validator(importMembersV2Schema)
+  .handler(async ({ data }) => {
+    const session = await requireAuthSession()
+    const userId = session.user.id
+
+    return prisma.$transaction(async (tx) => {
+      let deletedCount = 0
+
+      if (data.replaceExisting) {
+        const deleted = await tx.memberV2.deleteMany({
+          where: { userId },
+        })
+        deletedCount = deleted.count
+      }
+
+      const created = await tx.memberV2.createManyAndReturn({
+        data: data.members.map((member) => ({
+          name: member.name.trim(),
+          credit: member.credit,
+          percentage: member.percentage ?? 0,
+          remarks: cleanOptional(member.remarks),
+          mobileNo: cleanOptional(member.mobileNo),
+          date: resolveMemberV2Date(member.date),
+          userId,
+        })),
+      })
+
+      return {
+        deletedCount,
+        importedCount: created.length,
+        members: created.map(serializeMemberV2),
+      }
+    })
+  })
