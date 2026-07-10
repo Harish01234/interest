@@ -81,3 +81,8 @@ export type Calculation = Prisma.CalculationModel
  * 
  */
 export type MainCalculation = Prisma.MainCalculationModel
+/**
+ * Model MemberV2
+ * 
+ */
+export type MemberV2 = Prisma.MemberV2Model

@@ -58,7 +58,8 @@ export const ModelName = {
   Verification: 'Verification',
   Member: 'Member',
   Calculation: 'Calculation',
-  MainCalculation: 'MainCalculation'
+  MainCalculation: 'MainCalculation',
+  MemberV2: 'MemberV2'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -194,6 +195,23 @@ export const MainCalculationScalarFieldEnum = {
 } as const
 
 export type MainCalculationScalarFieldEnum = (typeof MainCalculationScalarFieldEnum)[keyof typeof MainCalculationScalarFieldEnum]
+
+
+export const MemberV2ScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  credit: 'credit',
+  percentage: 'percentage',
+  remarks: 'remarks',
+  mobileNo: 'mobileNo',
+  date: 'date',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type MemberV2ScalarFieldEnum = (typeof MemberV2ScalarFieldEnum)[keyof typeof MemberV2ScalarFieldEnum]
 
 
 export const SortOrder = {

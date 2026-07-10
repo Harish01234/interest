@@ -391,7 +391,8 @@ export const ModelName = {
   Verification: 'Verification',
   Member: 'Member',
   Calculation: 'Calculation',
-  MainCalculation: 'MainCalculation'
+  MainCalculation: 'MainCalculation',
+  MemberV2: 'MemberV2'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "todo" | "user" | "session" | "account" | "verification" | "member" | "calculation" | "mainCalculation"
+    modelProps: "todo" | "user" | "session" | "account" | "verification" | "member" | "calculation" | "mainCalculation" | "memberV2"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1003,6 +1004,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MemberV2: {
+      payload: Prisma.$MemberV2Payload<ExtArgs>
+      fields: Prisma.MemberV2FieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemberV2FindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemberV2FindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        findFirst: {
+          args: Prisma.MemberV2FindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemberV2FindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        findMany: {
+          args: Prisma.MemberV2FindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>[]
+        }
+        create: {
+          args: Prisma.MemberV2CreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        createMany: {
+          args: Prisma.MemberV2CreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemberV2CreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>[]
+        }
+        delete: {
+          args: Prisma.MemberV2DeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        update: {
+          args: Prisma.MemberV2UpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        deleteMany: {
+          args: Prisma.MemberV2DeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemberV2UpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemberV2UpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>[]
+        }
+        upsert: {
+          args: Prisma.MemberV2UpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberV2Payload>
+        }
+        aggregate: {
+          args: Prisma.MemberV2AggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemberV2>
+        }
+        groupBy: {
+          args: Prisma.MemberV2GroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberV2GroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemberV2CountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberV2CountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1159,6 +1234,23 @@ export const MainCalculationScalarFieldEnum = {
 } as const
 
 export type MainCalculationScalarFieldEnum = (typeof MainCalculationScalarFieldEnum)[keyof typeof MainCalculationScalarFieldEnum]
+
+
+export const MemberV2ScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  credit: 'credit',
+  percentage: 'percentage',
+  remarks: 'remarks',
+  mobileNo: 'mobileNo',
+  date: 'date',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+} as const
+
+export type MemberV2ScalarFieldEnum = (typeof MemberV2ScalarFieldEnum)[keyof typeof MemberV2ScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1415,6 +1507,7 @@ export type GlobalOmitConfig = {
   member?: Prisma.MemberOmit
   calculation?: Prisma.CalculationOmit
   mainCalculation?: Prisma.MainCalculationOmit
+  memberV2?: Prisma.MemberV2Omit
 }
 
 /* Types for Logging */

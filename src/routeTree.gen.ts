@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ValuesRouteImport } from './routes/values'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SessionsRouteImport } from './routes/sessions'
+import { Route as MemberV2RouteImport } from './routes/member-v2'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CalculationRouteImport } from './routes/calculation'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ const SigninRoute = SigninRouteImport.update({
 const SessionsRoute = SessionsRouteImport.update({
   id: '/sessions',
   path: '/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberV2Route = MemberV2RouteImport.update({
+  id: '/member-v2',
+  path: '/member-v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
+  '/member-v2': typeof MemberV2Route
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
   '/values': typeof ValuesRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
+  '/member-v2': typeof MemberV2Route
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
   '/values': typeof ValuesRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calculation': typeof CalculationRoute
   '/dashboard': typeof DashboardRoute
+  '/member-v2': typeof MemberV2Route
   '/sessions': typeof SessionsRoute
   '/signin': typeof SigninRoute
   '/values': typeof ValuesRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculation'
     | '/dashboard'
+    | '/member-v2'
     | '/sessions'
     | '/signin'
     | '/values'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculation'
     | '/dashboard'
+    | '/member-v2'
     | '/sessions'
     | '/signin'
     | '/values'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculation'
     | '/dashboard'
+    | '/member-v2'
     | '/sessions'
     | '/signin'
     | '/values'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculationRoute: typeof CalculationRoute
   DashboardRoute: typeof DashboardRoute
+  MemberV2Route: typeof MemberV2Route
   SessionsRoute: typeof SessionsRoute
   SigninRoute: typeof SigninRoute
   ValuesRoute: typeof ValuesRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/sessions'
       fullPath: '/sessions'
       preLoaderRoute: typeof SessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/member-v2': {
+      id: '/member-v2'
+      path: '/member-v2'
+      fullPath: '/member-v2'
+      preLoaderRoute: typeof MemberV2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculationRoute: CalculationRoute,
   DashboardRoute: DashboardRoute,
+  MemberV2Route: MemberV2Route,
   SessionsRoute: SessionsRoute,
   SigninRoute: SigninRoute,
   ValuesRoute: ValuesRoute,

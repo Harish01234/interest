@@ -25,6 +25,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   members       Member[]
+  membersV2     MemberV2[]
   @@unique([email])
   @@map("user")
 }
@@ -153,3 +154,34 @@ model MainCalculation {
 //interest is same as calculation table interest
 
 //other values here user will add
+
+
+model MemberV2 {
+  id         Int      @id @default(autoincrement())
+
+  name       String
+  credit     Int      @default(0)
+  percentage Float    @default(0)
+  remarks    String?
+  mobileNo   String?
+  date       DateTime @default(now())
+
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([name])
+  @@index([mobileNo])
+  @@index([active])
+  @@index([date])
+  @@index([userId])
+
+  @@map("member_v2")
+}
+
+
+
+
