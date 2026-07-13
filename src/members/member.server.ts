@@ -148,6 +148,7 @@ export async function deactivateMembersBySlNosImpl(
   deactivatedCount: number
 }> {
   const { user} = await requireAuthSession()
+  const userId = user.id
 
   const uniqueSlNos = [
     ...new Set(
@@ -159,7 +160,6 @@ export async function deactivateMembersBySlNosImpl(
 
   const result = await prisma.member.updateMany({
     where: {
-      userId: user.id,
       active: true,
       slNo: {
         in: uniqueSlNos,
