@@ -134,3 +134,44 @@ export async function deleteMemberImpl(data: {
 
   return { success: true }
 }
+
+//from here everything is new for array based members deactivation
+
+type DeactivateMembersBySlNosInput = {
+  slNos: string[]
+}
+
+export async function deactivateMembersBySlNosImpl(
+  input: DeactivateMembersBySlNosInput,
+): Promise<{
+  success: true
+  deactivatedCount: number
+}> {
+  const { user} = await requireAuthSession()
+
+  const uniqueSlNos = [
+    ...new Set(
+      input.slNos
+        .map((slNo) => slNo.trim())
+        .filter(Boolean),
+    ),
+  ]
+
+  const result = await prisma.member.updateMany({
+    where: {
+      userId: user.id,
+      active: true,
+      slNo: {
+        in: uniqueSlNos,
+      },
+    },
+    data: {
+      active: false,
+    },
+  })
+
+  return {
+    success: true,
+    deactivatedCount: result.count,
+  }
+}

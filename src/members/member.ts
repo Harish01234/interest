@@ -48,3 +48,35 @@ export const deleteMember = createServerFn({ method: 'POST' })
     const { deleteMemberImpl } = await import('@/members/member.server')
     return deleteMemberImpl(data)
   })
+
+
+  //from here everything is new for array based members deactivation
+
+  export const deactivateMembersBySlNosInputSchema = z.object({
+    slNos: z
+      .array(z.string().trim().min(1))
+      .min(1, 'Provide at least one serial number')
+      .max(500, 'Maximum 500 serial numbers allowed'),
+  })
+
+
+  export const deactivateMembersBySlNos = createServerFn({
+    method: 'POST',
+  })
+    .validator((input: unknown) =>
+      deactivateMembersBySlNosInputSchema.parse(input),
+    )
+    .handler(
+      async ({
+        data,
+      }): Promise<{
+        success: true
+        deactivatedCount: number
+      }> => {
+        const { deactivateMembersBySlNosImpl } = await import(
+          '@/members/member.server'
+        )
+  
+        return deactivateMembersBySlNosImpl(data)
+      },
+    )

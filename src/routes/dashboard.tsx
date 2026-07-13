@@ -12,6 +12,7 @@ import { SectionCard } from '@/components/patterns/section-card'
 import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { BulkDeactivateMembers } from '@/members/components/bulk-deactivate-members'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
@@ -119,6 +120,8 @@ function DashboardPage() {
           </div>
         </section>
 
+        
+
         <section aria-labelledby="dashboard-calculations-heading" className="space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="space-y-1">
@@ -141,6 +144,20 @@ function DashboardPage() {
           </div>
           <CalculationSummarySection />
         </section>
+
+        <section
+  aria-labelledby="dashboard-bulk-deactivate-heading"
+  className="space-y-3"
+>
+  <h2
+    id="dashboard-bulk-deactivate-heading"
+    className="font-heading text-lg font-semibold tracking-tight text-foreground"
+  >
+    Bulk deactivate members
+  </h2>
+
+  <BulkDeactivateMembers />
+</section>
 
         <section aria-labelledby="dashboard-import-heading" className="space-y-3">
           <h2
