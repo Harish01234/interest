@@ -1,6 +1,5 @@
 export type SaveMainCalculationInput = {
   totalToBill: number
-  jinisChara: number
 }
 
 export type MainCalculationDto = {
@@ -10,9 +9,9 @@ export type MainCalculationDto = {
   totalToBill: number
   /** SUDH — from period calculation interest (live) */
   interest: number
-  /** LAPTOP / Bandak — sum(credit) of active members (live) */
+  /** LAPTOP / Bandak — sum(credit) of active v1 members (live) */
   bandak: number
-  /** Jinish chara — user enters */
+  /** Jinish chara — sum(credit) of active MemberV2 records (live) */
   jinisChara: number
   /** CASH — from period left total (ToBill + Asol + Interest − Dewa) */
   cash: number

@@ -1,5 +1,6 @@
 import { prisma } from '#/db'
 
+import { sumActiveMemberV2CreditsImpl } from '@/features/member-v2/member-v2-credits.server'
 import { requireAuthSession } from '@/members/auth.server'
 import { getCalculationImpl } from '@/members/calculation.server'
 import { sumAllCreditsImpl } from '@/members/migration.server'
@@ -24,9 +25,9 @@ function buildMainCalculationDto(
   periodInterest: number,
   periodCash: number,
   bandak: number,
+  jinisChara: number,
 ): MainCalculationDto {
   const totalToBill = row?.TotalTobill ?? 0
-  const jinisChara = row?.jinisChara ?? 0
 
   const interest = periodInterest
   const cash = periodCash
@@ -52,10 +53,11 @@ function buildMainCalculationDto(
 export async function getMainCalculationImpl(): Promise<MainCalculationDto> {
   await requireAuthSession()
 
-  const [row, period, credits] = await Promise.all([
+  const [row, period, credits, memberV2Credits] = await Promise.all([
     getMainCalculationRow(),
     getCalculationImpl(),
     sumAllCreditsImpl(),
+    sumActiveMemberV2CreditsImpl(),
   ])
 
   return buildMainCalculationDto(
@@ -63,6 +65,7 @@ export async function getMainCalculationImpl(): Promise<MainCalculationDto> {
     period.interest,
     period.leftTotal,
     credits.total,
+    memberV2Credits.total,
   )
 }
 
@@ -71,15 +74,16 @@ export async function saveMainCalculationImpl(
 ): Promise<MainCalculationDto> {
   await requireAuthSession()
 
-  const [period, credits] = await Promise.all([
+  const [period, credits, memberV2Credits] = await Promise.all([
     getCalculationImpl(),
     sumAllCreditsImpl(),
+    sumActiveMemberV2CreditsImpl(),
   ])
 
   const manual = {
     TotalTobill: Math.trunc(data.totalToBill),
     Bandak: credits.total,
-    jinisChara: Math.trunc(data.jinisChara),
+    jinisChara: memberV2Credits.total,
     interest: period.interest,
     cash: period.leftTotal,
   }
@@ -98,6 +102,7 @@ export async function saveMainCalculationImpl(
     period.interest,
     period.leftTotal,
     credits.total,
+    memberV2Credits.total,
   )
 }
 
@@ -119,9 +124,10 @@ export async function resetMainCalculationImpl(): Promise<MainCalculationDto> {
       })
     : await prisma.mainCalculation.create({ data: {} })
 
-  const [period, credits] = await Promise.all([
+  const [period, credits, memberV2Credits] = await Promise.all([
     getCalculationImpl(),
     sumAllCreditsImpl(),
+    sumActiveMemberV2CreditsImpl(),
   ])
 
   return buildMainCalculationDto(
@@ -129,5 +135,6 @@ export async function resetMainCalculationImpl(): Promise<MainCalculationDto> {
     period.interest,
     period.leftTotal,
     credits.total,
+    memberV2Credits.total,
   )
 }
