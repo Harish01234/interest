@@ -39,6 +39,7 @@ import {
   toDateInputValue,
   toNumber,
 } from '@/features/member-v2/utils/formatters'
+import { AppShell } from '#/components/app-shell'
 
 export const Route = createFileRoute('/member-v2')({
   component: MemberV2Page,
@@ -283,6 +284,7 @@ function MemberV2Page() {
   }
 
   return (
+    <AppShell>
     <main className="relative min-h-screen overflow-hidden">
       <div className="page-glow" aria-hidden />
 
@@ -365,5 +367,6 @@ function MemberV2Page() {
         }}
       />
     </main>
+    </AppShell>
   )
 }

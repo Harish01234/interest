@@ -7,6 +7,7 @@ import {
   MonitorSmartphone,
   PenLine,
   Sparkles,
+  Users,
 } from 'lucide-react'
 
 import { BrandMark } from '@/components/patterns/brand-mark'
@@ -29,6 +30,7 @@ const navItems = [
   { to: '/calculation', label: 'Calculation', icon: Calculator },
   { to: '/values', label: 'Values', icon: PenLine },
   { to: '/sessions', label: 'Sessions', icon: MonitorSmartphone },
+  { to: '/member-v2', label: 'Member V2', icon: Users },
 ] as const
 
 function NavLink({
