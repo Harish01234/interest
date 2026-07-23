@@ -652,6 +652,8 @@ export function MembersPanel() {
     credit: '',
   })
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
+  const [activeFilter, setActiveFilter] = useState(true)
+
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState<(typeof pageSizeOptions)[number]>(10)
   const [selectedMember, setSelectedMember] = useState<MemberDto | null>(null)
@@ -681,8 +683,9 @@ export function MembersPanel() {
       fatherName: debouncedFilters.fatherName,
       credit: debouncedFilters.credit,
       type: typeFilter,
+      active: activeFilter,
     }),
-    [page, pageSize, debouncedFilters, typeFilter],
+    [page, pageSize, debouncedFilters, typeFilter,activeFilter],
   )
 
   const { data, isLoading, isFetching, error, refetch } = useQuery(
@@ -792,6 +795,7 @@ export function MembersPanel() {
         bodyClassName="space-y-4"
       >
         <MembersFilterPanel
+          active={activeFilter}
           slNo={slNoFilter}
           name={nameFilter}
           fatherName={fatherNameFilter}
@@ -811,6 +815,10 @@ export function MembersPanel() {
             setPage(1)
           }}
           onClearFilters={clearSearchFilters}
+          onActiveChange={(value) => {
+            setActiveFilter(value)
+            setPage(1)
+          }}
         />
 
         <div className="meta-bar">

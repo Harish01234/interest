@@ -32,6 +32,7 @@ export type GetMembersParams = {
   fatherName: string
   credit: string
   type: 'all' | MemberType
+  active: boolean
 }
 
 export type MigrateMembersResult = {

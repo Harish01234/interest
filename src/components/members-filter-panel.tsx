@@ -1,61 +1,66 @@
-import { Filter, Search, X } from 'lucide-react'
+import { Filter, Search, X } from "lucide-react";
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import type { GetMembersParams } from '@/members/types'
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import type { GetMembersParams } from "@/members/types";
 
 const typeFilterOptions = [
-  { value: 'all', label: 'All types' },
-  { value: 'gold', label: 'Gold' },
-  { value: 'silver', label: 'Silver' },
-  { value: 'both', label: 'Both' },
-  { value: 'unknown', label: 'Unknown' },
-] as const
+  { value: "all", label: "All types" },
+  { value: "gold", label: "Gold" },
+  { value: "silver", label: "Silver" },
+  { value: "both", label: "Both" },
+  { value: "unknown", label: "Unknown" },
+] as const;
 
-const pageSizeOptions = [10, 20, 50] as const
+const pageSizeOptions = [10, 20, 50] as const;
 
-type TypeFilter = GetMembersParams['type']
+type TypeFilter = GetMembersParams["type"];
 
 type SearchFilters = {
-  slNo: string
-  name: string
-  fatherName: string
-  credit: string
-}
+  slNo: string;
+  name: string;
+  fatherName: string;
+  credit: string;
+};
 
 type MembersFilterPanelProps = {
-  slNo: string
-  name: string
-  fatherName: string
-  credit: string
-  type: TypeFilter
-  pageSize: (typeof pageSizeOptions)[number]
-  onSlNoChange: (value: string) => void
-  onNameChange: (value: string) => void
-  onFatherNameChange: (value: string) => void
-  onCreditChange: (value: string) => void
-  onTypeChange: (value: TypeFilter) => void
-  onPageSizeChange: (value: (typeof pageSizeOptions)[number]) => void
-  onClearFilters: () => void
-}
+  slNo: string;
+  name: string;
+  fatherName: string;
+  credit: string;
+  type: TypeFilter;
+  active: boolean;
+
+  pageSize: (typeof pageSizeOptions)[number];
+
+  onActiveChange: (value: boolean) => void;
+
+  onSlNoChange: (value: string) => void;
+  onNameChange: (value: string) => void;
+  onFatherNameChange: (value: string) => void;
+  onCreditChange: (value: string) => void;
+  onTypeChange: (value: TypeFilter) => void;
+  onPageSizeChange: (value: (typeof pageSizeOptions)[number]) => void;
+  onClearFilters: () => void;
+};
 
 type FilterFieldProps = {
-  id: string
-  label: string
-  value: string
-  placeholder: string
-  onChange: (value: string) => void
-}
+  id: string;
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+};
 
 function FilterField({
   id,
@@ -81,39 +86,44 @@ function FilterField({
         />
       </div>
     </div>
-  )
+  );
 }
 
 type ActiveFilterChip = {
-  key: keyof SearchFilters
-  label: string
-  value: string
-}
+  key: keyof SearchFilters;
+  label: string;
+  value: string;
+};
 
 function getActiveFilters(filters: SearchFilters): ActiveFilterChip[] {
-  const chips: ActiveFilterChip[] = []
+  const chips: ActiveFilterChip[] = [];
 
   if (filters.slNo.trim()) {
-    chips.push({ key: 'slNo', label: 'Sl no', value: filters.slNo.trim() })
+    chips.push({ key: "slNo", label: "Sl no", value: filters.slNo.trim() });
   }
   if (filters.name.trim()) {
-    chips.push({ key: 'name', label: 'Name', value: filters.name.trim() })
+    chips.push({ key: "name", label: "Name", value: filters.name.trim() });
   }
   if (filters.fatherName.trim()) {
     chips.push({
-      key: 'fatherName',
+      key: "fatherName",
       label: "Father's name",
       value: filters.fatherName.trim(),
-    })
+    });
   }
   if (filters.credit.trim()) {
-    chips.push({ key: 'credit', label: 'Credit', value: filters.credit.trim() })
+    chips.push({
+      key: "credit",
+      label: "Credit",
+      value: filters.credit.trim(),
+    });
   }
 
-  return chips
+  return chips;
 }
 
 export function MembersFilterPanel({
+  active,
   slNo,
   name,
   fatherName,
@@ -121,6 +131,7 @@ export function MembersFilterPanel({
   type,
   pageSize,
   onSlNoChange,
+  onActiveChange,
   onNameChange,
   onFatherNameChange,
   onCreditChange,
@@ -128,21 +139,18 @@ export function MembersFilterPanel({
   onPageSizeChange,
   onClearFilters,
 }: MembersFilterPanelProps) {
-  const activeFilters = getActiveFilters({ slNo, name, fatherName, credit })
-  const hasActiveFilters = activeFilters.length > 0
+  const activeFilters = getActiveFilters({ slNo, name, fatherName, credit });
+  const hasActiveFilters = activeFilters.length > 0;
 
   const clearField = (key: keyof SearchFilters) => {
-    if (key === 'slNo') onSlNoChange('')
-    if (key === 'name') onNameChange('')
-    if (key === 'fatherName') onFatherNameChange('')
-    if (key === 'credit') onCreditChange('')
-  }
+    if (key === "slNo") onSlNoChange("");
+    if (key === "name") onNameChange("");
+    if (key === "fatherName") onFatherNameChange("");
+    if (key === "credit") onCreditChange("");
+  };
 
   return (
-    <search
-      className="members-filter-panel"
-      aria-label="Member search filters"
-    >
+    <search className="members-filter-panel" aria-label="Member search filters">
       <div className="members-filter-header">
         <div className="members-filter-intro">
           <div className="icon-tile icon-tile-primary shrink-0">
@@ -240,6 +248,7 @@ export function MembersFilterPanel({
             <Label htmlFor="filter-type" className="members-filter-label">
               Type
             </Label>
+
             <Select
               value={type}
               onValueChange={(value) => onTypeChange(value as TypeFilter)}
@@ -250,6 +259,7 @@ export function MembersFilterPanel({
               >
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
+
               <SelectContent>
                 {typeFilterOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
@@ -261,13 +271,39 @@ export function MembersFilterPanel({
           </div>
 
           <div className="members-filter-option">
+            <Label htmlFor="filter-status" className="members-filter-label">
+              Status
+            </Label>
+
+            <Select
+              value={String(active)}
+              onValueChange={(value) => onActiveChange(value === "true")}
+            >
+              <SelectTrigger
+                id="filter-status"
+                className="toolbar-select toolbar-select-md"
+              >
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="true">Active members</SelectItem>
+                <SelectItem value="false">Inactive members</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="members-filter-option">
             <Label htmlFor="filter-page-size" className="members-filter-label">
               Rows per page
             </Label>
+
             <Select
               value={String(pageSize)}
               onValueChange={(value) =>
-                onPageSizeChange(Number(value) as (typeof pageSizeOptions)[number])
+                onPageSizeChange(
+                  Number(value) as (typeof pageSizeOptions)[number],
+                )
               }
             >
               <SelectTrigger
@@ -276,6 +312,7 @@ export function MembersFilterPanel({
               >
                 <SelectValue placeholder="Rows per page" />
               </SelectTrigger>
+
               <SelectContent>
                 {pageSizeOptions.map((size) => (
                   <SelectItem key={size} value={String(size)}>
@@ -288,8 +325,8 @@ export function MembersFilterPanel({
         </div>
       </div>
     </search>
-  )
+  );
 }
 
-export { pageSizeOptions, typeFilterOptions }
-export type { TypeFilter }
+export { pageSizeOptions, typeFilterOptions };
+export type { TypeFilter };

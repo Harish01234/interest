@@ -33,6 +33,8 @@ const getMembersInputSchema = z.object({
   fatherName: z.string().default(''),
   credit: z.string().default(''),
   type: z.enum(['all', 'gold', 'silver', 'both', 'unknown']).default('all'),
+  active: z.boolean().default(true),
+
 })
 
 export const getMembers = createServerFn({ method: 'GET' })

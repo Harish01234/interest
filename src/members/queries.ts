@@ -16,6 +16,7 @@ export const defaultMembersParams: GetMembersParams = {
   fatherName: '',
   credit: '',
   type: 'all',
+  active: true,
 }
 
 export function membersQueryOptions(params: GetMembersParams = defaultMembersParams) {
